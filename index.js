@@ -7,7 +7,7 @@ const config = {
   channelAccessToken: process.env.CHANNEL_ACCESS_TOKEN
 };
 
-// Create LINE client
+// Create LINE SDK client
 const client = new line.messagingApi.MessagingApiClient({
   channelAccessToken: config.channelAccessToken
 });
@@ -20,60 +20,58 @@ app.get('/', (req, res) => {
   res.send('LINE Bot is running! 🤖');
 });
 
-// Webhook endpoint
-app.post('/webhook', line.middleware(config), (req, res) => {
-  Promise
-    .all(req.body.events.map(handleEvent))
-    .then((result) => res.json(result))
-    .catch((err) => {
-      console.error(err);
-      res.status(500).end();
-    });
+// Webhook endpoint - handle POST requests from LINE
+app.post('/webhook', line.middleware(config), async (req, res) => {
+  try {
+    const events = req.body.events;
+    
+    // Process all events
+    await Promise.all(events.map(handleEvent));
+    
+    res.status(200).end();
+  } catch (err) {
+    console.error('Webhook error:', err);
+    res.status(500).end();
+  }
 });
 
-// Event handler
+// Handle each event
 async function handleEvent(event) {
-  // Ignore non-message events
+  // Only handle message events
   if (event.type !== 'message' || event.message.type !== 'text') {
-    return Promise.resolve(null);
+    return null;
   }
 
   // Get user's message
   const userMessage = event.message.text.toLowerCase();
-  let replyMessage;
+  let replyText;
 
-  // Simple responses based on user input
+  // Simple bot responses
   if (userMessage.includes('hello') || userMessage.includes('hi')) {
-    replyMessage = {
-      type: 'text',
-      text: 'Hello! 👋 Welcome to Sushi Bot! How can I help you today?'
-    };
+    replyText = 'Hello! 👋 Welcome to Sushi Bot! How can I help you today?';
   } else if (userMessage.includes('menu')) {
-    replyMessage = {
-      type: 'text',
-      text: '🍣 Our menu:\n- Salmon Sushi\n- Tuna Sushi\n- Unagi Sushi\n\nTap the menu button below to see more!'
-    };
+    replyText = '🍣 Our menu:\n- Salmon Sushi\n- Tuna Sushi\n- Unagi Sushi\n\nTap the menu button below to see more!';
   } else if (userMessage.includes('help')) {
-    replyMessage = {
-      type: 'text',
-      text: 'I can help you with:\n✅ View menu\n✅ Make reservation\n✅ Check hours\n\nJust ask me anything!'
-    };
+    replyText = 'I can help you with:\n✅ View menu\n✅ Make reservation\n✅ Check hours\n\nJust ask me anything!';
   } else {
-    replyMessage = {
-      type: 'text',
-      text: `You said: "${event.message.text}"\n\nTry saying "hello", "menu", or "help"! 😊`
-    };
+    replyText = `You said: "${event.message.text}"\n\nTry saying "hello", "menu", or "help"! 😊`;
   }
 
-  // Send reply
+  // Reply to user
+  const echo = {
+    type: 'text',
+    text: replyText
+  };
+
   return client.replyMessage({
     replyToken: event.replyToken,
-    messages: [replyMessage]
+    messages: [echo]
   });
 }
 
 // Start server
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
+  console.log(`✅ Server is running on port ${port}`);
+  console.log(`✅ Webhook URL: /webhook`);
 });
