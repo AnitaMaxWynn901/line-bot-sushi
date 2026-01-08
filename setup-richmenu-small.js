@@ -142,6 +142,5 @@ async function createRichMenu() {
     }
   }
 }
-
 // Run the function
 createRichMenu();
