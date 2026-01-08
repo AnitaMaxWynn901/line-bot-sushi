@@ -1,13 +1,46 @@
 const line = require('@line/bot-sdk');
 const fs = require('fs');
+const https = require('https');
 
 // Replace with your actual Channel Access Token
 const channelAccessToken = 'prYaEUH3XjRodzDXB794VDmgNw0s5R/eRajc/EBJkayIAPpNpt1v9ecoWL5HjwmjF4BgMPBS+5+4zljeD54CaBJPS4qYfRivIs4oDU4TAznDzRtcIMYJNRhTzUY20lYSpk/yuVOjqL3wblW8HRahiwdB04t89/1O/w1cDnyilFU=';
 
-// Create LINE client using the new SDK v8+ syntax
+// Create LINE client
 const client = new line.messagingApi.MessagingApiClient({
   channelAccessToken: channelAccessToken
 });
+
+async function uploadRichMenuImage(richMenuId, imagePath) {
+  return new Promise((resolve, reject) => {
+    const imageData = fs.readFileSync(imagePath);
+    
+    const options = {
+      hostname: 'api-data.line.me',
+      path: `/v2/bot/richmenu/${richMenuId}/content`,
+      method: 'POST',
+      headers: {
+        'Content-Type': 'image/png',
+        'Content-Length': imageData.length,
+        'Authorization': `Bearer ${channelAccessToken}`
+      }
+    };
+
+    const req = https.request(options, (res) => {
+      if (res.statusCode === 200) {
+        resolve();
+      } else {
+        reject(new Error(`Upload failed with status ${res.statusCode}`));
+      }
+    });
+
+    req.on('error', (error) => {
+      reject(error);
+    });
+
+    req.write(imageData);
+    req.end();
+  });
+}
 
 async function createRichMenu() {
   try {
@@ -71,10 +104,10 @@ async function createRichMenu() {
     
     console.log('✅ Rich menu created:', richMenuId);
 
-    // Step 2: Upload image
+    // Step 2: Upload image using direct API call
     console.log('Uploading image...');
     
-    const imagePath = '/richmenu.png';
+    const imagePath = './richmenu.png';
     
     // Check if image exists
     if (!fs.existsSync(imagePath)) {
@@ -83,15 +116,8 @@ async function createRichMenu() {
       return;
     }
 
-    const imageBuffer = fs.readFileSync(imagePath);
-    
-    // Upload using the correct method for SDK v8+
-    await client.setRichMenuImage(
-      richMenuId,
-      imageBuffer,
-      'image/png'
-    );
-
+    // Upload image using direct HTTPS request
+    await uploadRichMenuImage(richMenuId, imagePath);
     console.log('✅ Image uploaded!');
 
     // Step 3: Set as default rich menu
@@ -104,6 +130,7 @@ async function createRichMenu() {
     console.log('Rich Menu ID:', richMenuId);
     console.log('');
     console.log('Now open your LINE bot and you should see the menu at the bottom!');
+    console.log('It might take 1-2 minutes to appear.');
 
   } catch (error) {
     console.error('❌ Error:', error.message);
@@ -113,12 +140,12 @@ async function createRichMenu() {
     }
     
     // Common error tips
-    console.log('');
-    console.log('💡 Common issues:');
-    console.log('1. Make sure your Channel Access Token is correct');
-    console.log('2. Make sure richmenu.png exists (2500 x 1686 pixels)');
-    console.log('3. Make sure the image is under 1MB');
-    console.log('4. Replace YOUR_LIFF_ID_HERE with your actual LIFF ID');
+    // console.log('');
+    // console.log('💡 Common issues:');
+    // console.log('1. Make sure your Channel Access Token is correct');
+    // console.log('2. Make sure richmenu.png exists (2500 x 1686 pixels)');
+    // console.log('3. Make sure the image is under 1MB');
+    // console.log('4. Replace YOUR_LIFF_ID_HERE with your actual LIFF ID');
   }
 }
 
