@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sushi Menu</title>
+  <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 20px;
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 500px;
+      margin: 0 auto;
+    }
+    .header {
+      background: white;
+      padding: 20px;
+      border-radius: 15px;
+      text-align: center;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .header h1 {
+      color: #333;
+      font-size: 24px;
+      margin-bottom: 10px;
+    }
+    .user-info {
+      background: white;
+      padding: 20px;
+      border-radius: 15px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .user-info img {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      margin-bottom: 10px;
+    }
+    .menu-item {
+      background: white;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 15px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .menu-item h3 {
+      color: #333;
+      font-size: 18px;
+    }
+    .menu-item p {
+      color: #666;
+      font-size: 14px;
+    }
+    .price {
+      color: #667eea;
+      font-weight: bold;
+      font-size: 18px;
+    }
+    .btn {
+      background: #667eea;
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      border-radius: 25px;
+      font-size: 16px;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 10px;
+    }
+    .btn:hover {
+      background: #5568d3;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🍣 Sushi Menu</h1>
+      <p>Welcome to our restaurant!</p>
+    </div>
+
+    <div class="user-info" id="userInfo">
+      <p>Loading user info...</p>
+    </div>
+
+    <div class="menu-item">
+      <div>
+        <h3>🍣 Salmon Sushi</h3>
+        <p>Fresh Norwegian salmon</p>
+      </div>
+      <div class="price">$12</div>
+    </div>
+
+    <div class="menu-item">
+      <div>
+        <h3>🍣 Tuna Sushi</h3>
+        <p>Premium bluefin tuna</p>
+      </div>
+      <div class="price">$15</div>
+    </div>
+
+    <div class="menu-item">
+      <div>
+        <h3>🍣 Unagi Sushi</h3>
+        <p>Grilled freshwater eel</p>
+      </div>
+      <div class="price">$18</div>
+    </div>
+
+    <button class="btn" onclick="sendMessage()">Order Now</button>
+    <button class="btn" onclick="closeLIFF()">Close</button>
+  </div>
+
+  <script>
+    // Initialize LIFF
+    async function initializeLiff() {
+      try {
+        await liff.init({ liffId: 'YOUR_LIFF_ID_HERE' });
+        
+        if (liff.isLoggedIn()) {
+          getUserProfile();
+        } else {
+          liff.login();
+        }
+      } catch (err) {
+        console.error('LIFF initialization failed', err);
+      }
+    }
+
+    // Get user profile
+    async function getUserProfile() {
+      try {
+        const profile = await liff.getProfile();
+        document.getElementById('userInfo').innerHTML = `
+          <img src="${profile.pictureUrl}" alt="Profile">
+          <h3>Hello, ${profile.displayName}! 👋</h3>
+          <p>Welcome to our sushi restaurant</p>
+        `;
+      } catch (err) {
+        console.error('Error getting profile', err);
+      }
+    }
+
+    // Send message to chat
+    function sendMessage() {
+      if (liff.isInClient()) {
+        liff.sendMessages([{
+          type: 'text',
+          text: 'I want to make a reservation! 🍣'
+        }]).then(() => {
+          alert('Message sent!');
+        });
+      } else {
+        alert('This function only works in LINE app');
+      }
+    }
+
+    // Close LIFF
+    function closeLIFF() {
+      liff.closeWindow();
+    }
+
+    // Initialize when page loads
+    initializeLiff();
+  </script>
+</body>
+</html>

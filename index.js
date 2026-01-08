@@ -12,8 +12,12 @@ const client = new line.messagingApi.MessagingApiClient({
   channelAccessToken: config.channelAccessToken
 });
 
+
 // Create Express app
 const app = express();
+
+
+app.use(express.static('public'));
 
 // Health check endpoint
 app.get('/', (req, res) => {
