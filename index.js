@@ -76,6 +76,6 @@ async function handleEvent(event) {
 // Start server
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
-  console.log(`✅ Server is running on port ${port}`);
-  console.log(`✅ Webhook URL: /webhook`);
+  console.log(`Server is running on port ${port}`);
+  console.log(`Webhook URL: /webhook`);
 });
