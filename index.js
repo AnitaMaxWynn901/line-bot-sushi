@@ -54,7 +54,7 @@ async function handleEvent(event) {
   if (userMessage.includes('hello') || userMessage.includes('hi')) {
     replyText = 'Hello! 👋 Welcome to Sushi Bot! How can I help you today?';
   } else if (userMessage.includes('menu')) {
-    replyText = '🍣 Our menu:\n- Salmon Sushi\n- Tuna Sushi\n- Unagi Sushi\n\nTap the menu button below to see more!';
+    replyText = '🍣 Our menu:\n- Salmon Sushi\n- Tuna Sushi\n- Unagi Sushi\n\nTap the LIFF button below to see more!';
   } else if (userMessage.includes('help')) {
     replyText = 'I can help you with:\n✅ View menu\n✅ Make reservation\n✅ Check hours\n\nJust ask me anything!';
   } else {
