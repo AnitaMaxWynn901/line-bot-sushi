@@ -58,7 +58,7 @@ async function handleEvent(event) {
   } else if (userMessage.includes('help')) {
     replyText = 'I can help you with:\n✅ View menu\n✅ Make reservation\n✅ Check hours\n\nJust ask me anything!';
   } else {
-    replyText = `You said: "${event.message.text}"\n\nTry saying "hello", "menu", or "help"! 😊`;
+    replyText = `You said: "${event.message.text}"`;
   }
 
   // Reply to user
