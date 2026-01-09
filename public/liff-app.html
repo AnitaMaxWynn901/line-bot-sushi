@@ -172,26 +172,21 @@
     // Send message to chat
     function sendMessage() {
       console.log('🔍 sendMessage() called');
-      console.log('🔍 isInClient:', liff.isInClient());
 
-      if (liff.isInClient()) {
-        console.log('✅ Inside LINE app, sending message...');
-        liff.sendMessages([{
-          type: 'text',
-          text: 'I want to make a reservation! 🍣'
-        }])
-          .then(() => {
-            console.log('✅ Message sent successfully!');
-            alert('Message sent!');
-          })
-          .catch((error) => {
-            console.error('❌ Error sending message:', error);
-            alert('Error: ' + error.message);
-          });
-      } else {
-        console.log('❌ Not in LINE app');
-        alert('This function only works in LINE app');
-      }
+      // Try sending message directly
+      liff.sendMessages([{
+        type: 'text',
+        text: 'I want to make a reservation! 🍣'
+      }])
+        .then(() => {
+          console.log('✅ Message sent successfully!');
+          alert('Message sent!');
+        })
+        .catch((error) => {
+          console.error('❌ Error:', error);
+          // Show the actual error message
+          alert('Error: ' + error.message);
+        });
     }
 
     // Close LIFF
