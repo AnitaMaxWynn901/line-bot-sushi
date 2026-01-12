@@ -140,83 +140,78 @@
     <button class="btn" onclick="closeLIFF()">Close</button>
   </div>
 
-<script>
-  // ===== SUPABASE SETUP ===== (MOVE THIS TO TOP!)
-  const SUPABASE_URL = 'https://rrppsqmcunaeouijzrly.supabase.co';
-  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJycHBzcW1jdW5hZW91aWp6cmx5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgxNzYzMTEsImV4cCI6MjA4Mzc1MjMxMX0.oOh5Dox4S4k9nRjDGMYi1iFUbGSjsnx8_Fgd7n1EE-8';
-  
-  // Create Supabase client (CREATE IT FIRST!)
-  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  <script>
+    // ===== SUPABASE SETUP =====
+    const SUPABASE_URL = 'https://rrppsqmcunaeouijzrly.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJycHBzcW1jdW5hZW91aWp6cmx5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgxNzYzMTEsImV4cCI6MjA4Mzc1MjMxMX0.oOh5Dox4S4k9nRjDGMYi1iFUbGSjsnx8_Fgd7n1EE-8';
 
-  // ===== TEST FUNCTION =====
-  async function testSupabase() {
-    console.log('🧪 Testing Supabase connection...');
-    
-    const { data, error } = await supabase
-      .from('members')
-      .select('*');
-    
-    if (error) {
-      console.error('❌ Error:', error);
-    } else {
-      console.log('✅ Connected! Members:', data);
-    }
-  }
+    // Create Supabase client
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    console.log('✅ Supabase client created');
 
-  // ===== LIFF FUNCTIONS =====
-  async function initializeLiff() {
-    try {
-      await liff.init({ liffId: '2008845366-HByFMhkn' });
-      
-      if (liff.isLoggedIn()) {
-        getUserProfile();
-      } else {
-        liff.login();
+    // ===== LIFF FUNCTIONS =====
+    async function initializeLiff() {
+      try {
+        console.log('🔄 Initializing LIFF...');
+        await liff.init({ liffId: '2008845366-HByFMhkn' });
+        console.log('✅ LIFF initialized');
+
+        if (liff.isLoggedIn()) {
+          console.log('✅ User logged in');
+          getUserProfile();
+        } else {
+          console.log('⚠️ User not logged in, redirecting...');
+          liff.login();
+        }
+      } catch (err) {
+        console.error('❌ LIFF initialization failed:', err);
       }
-    } catch (err) {
-      console.error('LIFF initialization failed', err);
     }
-  }
 
-  async function getUserProfile() {
-    try {
-      const profile = await liff.getProfile();
-      document.getElementById('userInfo').innerHTML = `
+    async function getUserProfile() {
+      try {
+        console.log('🔄 Getting user profile...');
+        const profile = await liff.getProfile();
+        console.log('✅ Profile received:', profile);
+
+        document.getElementById('userInfo').innerHTML = `
         <img src="${profile.pictureUrl}" alt="Profile">
         <h3>Hello, ${profile.displayName}! 👋</h3>
         <p>Welcome to our sushi restaurant</p>
+        <p style="font-size: 12px; color: #999;">User ID: ${profile.userId}</p>
       `;
-    } catch (err) {
-      console.error('Error getting profile', err);
+      } catch (err) {
+        console.error('❌ Error getting profile:', err);
+      }
     }
-  }
 
-  function sendMessage() {
-    console.log('🔍 sendMessage() called');
-    
-    liff.sendMessages([{
-      type: 'text',
-      text: 'I want to make an order! 🍣'
-    }])
-    .then(() => {
-      console.log('✅ Message sent successfully!');
-      alert('Message sent!');
-    })
-    .catch((error) => {
-      console.error('❌ Error:', error);
-      alert('Error: ' + error.message);
-    });
-  }
+    function sendMessage() {
+      console.log('🔍 sendMessage() called');
 
-  function closeLIFF() {
-    liff.closeWindow();
-  }
-  // ===== START EVERYTHING ===== (ONLY ONCE!)
-  window.onload = function() {
-    testSupabase();    // Test Supabase connection
-    initializeLiff();  // Start LIFF
-  };
-</script>
+      liff.sendMessages([{
+        type: 'text',
+        text: 'I want to make an order! 🍣'
+      }])
+        .then(() => {
+          console.log('✅ Message sent successfully!');
+          alert('Message sent!');
+        })
+        .catch((error) => {
+          console.error('❌ Error:', error);
+          alert('Error: ' + error.message);
+        });
+    }
+
+    function closeLIFF() {
+      liff.closeWindow();
+    }
+
+    // ===== START =====
+    window.onload = function () {
+      console.log('📱 Page loaded, starting LIFF...');
+      initializeLiff();  // Only LIFF, no test function
+    };
+  </script>
 </body>
 
 </html>
