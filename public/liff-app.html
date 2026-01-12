@@ -141,27 +141,27 @@
   </div>
 
 <script>
-  // ===== SUPABASE SETUP ===== (MOVE THIS TO TOP!)
-  const SUPABASE_URL = 'https://rrppsqmcunaeouijzrly.supabase.co';
-  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJycHBzcW1jdW5hZW91aWp6cmx5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgxNzYzMTEsImV4cCI6MjA4Mzc1MjMxMX0.oOh5Dox4S4k9nRjDGMYi1iFUbGSjsnx8_Fgd7n1EE-8';
+  // // ===== SUPABASE SETUP ===== (MOVE THIS TO TOP!)
+  // const SUPABASE_URL = 'https://rrppsqmcunaeouijzrly.supabase.co';
+  // const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJycHBzcW1jdW5hZW91aWp6cmx5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgxNzYzMTEsImV4cCI6MjA4Mzc1MjMxMX0.oOh5Dox4S4k9nRjDGMYi1iFUbGSjsnx8_Fgd7n1EE-8';
   
-  // Create Supabase client (CREATE IT FIRST!)
-  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  // // Create Supabase client (CREATE IT FIRST!)
+  // const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  // ===== TEST FUNCTION =====
-  async function testSupabase() {
-    console.log('🧪 Testing Supabase connection...');
+  // // ===== TEST FUNCTION =====
+  // async function testSupabase() {
+  //   console.log('🧪 Testing Supabase connection...');
     
-    const { data, error } = await supabase
-      .from('members')
-      .select('*');
+  //   const { data, error } = await supabase
+  //     .from('members')
+  //     .select('*');
     
-    if (error) {
-      console.error('❌ Error:', error);
-    } else {
-      console.log('✅ Connected! Members:', data);
-    }
-  }
+  //   if (error) {
+  //     console.error('❌ Error:', error);
+  //   } else {
+  //     console.log('✅ Connected! Members:', data);
+  //   }
+  // }
 
   // ===== LIFF FUNCTIONS =====
   async function initializeLiff() {
@@ -211,12 +211,12 @@
   function closeLIFF() {
     liff.closeWindow();
   }
-
-  // ===== START EVERYTHING ===== (ONLY ONCE!)
-  window.onload = function() {
-    testSupabase();    // Test Supabase connection
-    initializeLiff();  // Start LIFF
-  };
+  initializeLiff();
+  // // ===== START EVERYTHING ===== (ONLY ONCE!)
+  // window.onload = function() {
+  //   testSupabase();    // Test Supabase connection
+  //   initializeLiff();  // Start LIFF
+  // };
 </script>
 </body>
 
