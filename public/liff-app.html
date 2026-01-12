@@ -5,6 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sushi Menu</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   <style>
     * {
@@ -140,6 +141,34 @@
   </div>
 
   <script>
+
+    // ===== SUPABASE SETUP =====
+    const SUPABASE_URL = 'https://rrppsqmcunaeouijzrly.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJycHBzcW1jdW5hZW91aWp6cmx5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgxNzYzMTEsImV4cCI6MjA4Mzc1MjMxMX0.oOh5Dox4S4k9nRjDGMYi1iFUbGSjsnx8_Fgd7n1EE-8';
+
+    // Test Supabase connection
+    async function testSupabase() {
+      console.log('🧪 Testing Supabase connection...');
+
+      const { data, error } = await supabase
+        .from('members')
+        .select('*');
+
+      if (error) {
+        console.error('❌ Error:', error);
+      } else {
+        console.log('✅ Connected! Members:', data);
+      }
+    }
+
+    // Call test when page loads
+    window.onload = function () {
+      testSupabase();
+      initializeLiff();
+    };
+
+    // Create Supabase client
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     // Initialize LIFF
     async function initializeLiff() {
       try {
