@@ -141,70 +141,111 @@
   </div>
 
   <script>
-    // ===== SUPABASE SETUP =====
-    const SUPABASE_URL = 'https://rrppsqmcunaeouijzrly.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJycHBzcW1jdW5hZW91aWp6cmx5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgxNzYzMTEsImV4cCI6MjA4Mzc1MjMxMX0.oOh5Dox4S4k9nRjDGMYi1iFUbGSjsnx8_Fgd7n1EE-8';
+    // ===== WAIT FOR EVERYTHING TO LOAD =====
+    (async function () {
+      // Step 1: Wait for page to be ready
+      if (document.readyState === 'loading') {
+        await new Promise(resolve => {
+          document.addEventListener('DOMContentLoaded', resolve);
+        });
+      }
 
-    // Create Supabase client
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      // Step 2: Wait for Supabase SDK to load
+      let supabaseWaitCount = 0;
+      while (typeof window.supabase === 'undefined' && supabaseWaitCount < 50) {
+        await new Promise(resolve => setTimeout(resolve, 100)); // Wait 100ms
+        supabaseWaitCount++;
+      }
 
-    // ===== LIFF FUNCTIONS =====
-    async function initializeLiff() {
+      if (typeof window.supabase === 'undefined') {
+        console.error('❌ Supabase SDK failed to load');
+        document.getElementById('userInfo').innerHTML =
+          '<p style="color: red;">Error: Supabase SDK not loaded</p>';
+        return;
+      }
+
+      console.log('✅ Supabase SDK loaded');
+
+      // Step 3: Wait for LIFF SDK to load
+      let liffWaitCount = 0;
+      while (typeof liff === 'undefined' && liffWaitCount < 50) {
+        await new Promise(resolve => setTimeout(resolve, 100)); // Wait 100ms
+        liffWaitCount++;
+      }
+
+      if (typeof liff === 'undefined') {
+        console.error('❌ LIFF SDK failed to load');
+        document.getElementById('userInfo').innerHTML =
+          '<p style="color: red;">Error: LIFF SDK not loaded</p>';
+        return;
+      }
+
+      console.log('✅ LIFF SDK loaded');
+
+      // Step 4: NOW create Supabase client (after SDK is loaded!)
+      const SUPABASE_URL = 'https://rrppsqmcunaeouijzrly.supabase.co';
+      const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJycHBzcW1jdW5hZW91aWp6cmx5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgxNzYzMTEsImV4cCI6MjA4Mzc1MjMxMX0.oOh5Dox4S4k9nRjDGMYi1iFUbGSjsnx8_Fgd7n1EE-8';
+
+      const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      console.log('✅ Supabase client created');
+
+      // Step 5: Initialize LIFF
       try {
+        console.log('🔄 Initializing LIFF...');
         await liff.init({ liffId: '2008845366-HByFMhkn' });
+        console.log('✅ LIFF initialized');
 
         if (liff.isLoggedIn()) {
-          // User is logged in - get profile
-          getUserProfile();
+          console.log('✅ User is logged in');
+          await getUserProfile();
         } else {
-          // User not logged in - redirect to login
+          console.log('⚠️ User not logged in, redirecting...');
           liff.login();
         }
       } catch (err) {
-        console.error('LIFF error:', err);
+        console.error('❌ LIFF error:', err);
         document.getElementById('userInfo').innerHTML =
-          '<p style="color: red;">Error: ' + err.message + '</p>';
+          '<p style="color: red;">LIFF Error: ' + err.message + '</p>';
       }
-    }
 
-    async function getUserProfile() {
-      try {
-        const profile = await liff.getProfile();
+      // ===== FUNCTIONS =====
+      async function getUserProfile() {
+        try {
+          console.log('🔄 Getting profile...');
+          const profile = await liff.getProfile();
+          console.log('✅ Profile loaded:', profile);
 
-        document.getElementById('userInfo').innerHTML = `
-        <img src="${profile.pictureUrl}" alt="Profile">
-        <h3>Hello, ${profile.displayName}! 👋</h3>
-        <p>Welcome to our sushi restaurant</p>
-        <p style="font-size: 12px; color: #999;">User ID: ${profile.userId}</p>
-      `;
-      } catch (err) {
-        console.error('Profile error:', err);
-        document.getElementById('userInfo').innerHTML =
-          '<p style="color: red;">Error getting profile: ' + err.message + '</p>';
+          document.getElementById('userInfo').innerHTML = `
+          <img src="${profile.pictureUrl}" alt="Profile">
+          <h3>Hello, ${profile.displayName}! 👋</h3>
+          <p>Welcome to our sushi restaurant</p>
+          <p style="font-size: 12px; color: #999;">User ID: ${profile.userId}</p>
+        `;
+
+          // NOW you can use Supabase here to check if user is registered
+          console.log('Supabase is ready to use!');
+        } catch (err) {
+          console.error('❌ Profile error:', err);
+          document.getElementById('userInfo').innerHTML =
+            '<p style="color: red;">Error: ' + err.message + '</p>';
+        }
       }
-    }
 
-    function sendMessage() {
-      liff.sendMessages([{
-        type: 'text',
-        text: 'I want to make an order! 🍣'
-      }])
-        .then(() => {
-          alert('Message sent!');
-        })
-        .catch((error) => {
-          alert('Error: ' + error.message);
-        });
-    }
+      // Make functions available globally for onclick handlers
+      window.sendMessage = function () {
+        liff.sendMessages([{
+          type: 'text',
+          text: 'I want to make an order! 🍣'
+        }])
+          .then(() => alert('Message sent!'))
+          .catch((error) => alert('Error: ' + error.message));
+      };
 
-    function closeLIFF() {
-      liff.closeWindow();
-    }
-
-    // ===== START IMMEDIATELY (NOT on window.onload) =====
-    initializeLiff();
+      window.closeLIFF = function () {
+        liff.closeWindow();
+      };
+    })();
   </script>
-
 </body>
 
 </html>
