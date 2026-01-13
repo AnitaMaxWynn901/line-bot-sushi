@@ -222,8 +222,73 @@
       };
 
       // Register member (placeholder for now)
-      window.registerMember = function () {
-        alert('Registration function - we will add this next!');
+      // Register member - SAVE TO DATABASE
+      window.registerMember = async function () {
+        // Get form values
+        const phone = document.getElementById('phone').value.trim();
+        const email = document.getElementById('email').value.trim();
+
+        // Validation - phone is required
+        if (!phone) {
+          alert('❌ Please enter your phone number');
+          return;
+        }
+
+        if (phone.length < 10) {
+          alert('❌ Please enter a valid phone number (at least 10 digits)');
+          return;
+        }
+
+        try {
+          // Get user profile from LIFF
+          const profile = await liff.getProfile();
+
+          console.log('📝 Registering member:', {
+            userId: profile.userId,
+            name: profile.displayName,
+            phone: phone,
+            email: email
+          });
+
+          // Insert into Supabase database
+          const { data, error } = await supabase
+            .from('members')
+            .insert([
+              {
+                line_user_id: profile.userId,
+                display_name: profile.displayName,
+                phone: phone,
+                email: email || null,
+                points: 0
+              }
+            ])
+            .select();
+
+          if (error) {
+            console.error('❌ Registration error:', error);
+            alert('❌ Registration failed: ' + error.message);
+            return;
+          }
+
+          console.log('✅ Registration successful:', data);
+
+          // Show success message
+          alert('🎉 Welcome! You are now a member!');
+
+          // Hide registration form
+          document.getElementById('registrationForm').style.display = 'none';
+
+          // Show member card with new data
+          showMemberCard(data[0]);
+
+          // Clear form
+          document.getElementById('phone').value = '';
+          document.getElementById('email').value = '';
+
+        } catch (err) {
+          console.error('❌ Error:', err);
+          alert('❌ Something went wrong. Please try again.');
+        }
       };
     })();
   </script>
