@@ -147,7 +147,7 @@
           <p>Welcome to our sushi restaurant</p>
           <p style="font-size: 12px; color: #999;">User ID: ${profile.userId}</p>
         `;
-
+          await checkMembershipStatus(profile.userId);
           // NOW you can use Supabase here to check if user is registered
           console.log('Supabase is ready to use!');
         } catch (err) {
@@ -171,6 +171,44 @@
         liff.closeWindow();
       };
 
+      // ===== MEMBERSHIP DATABASE FUNCTIONS =====
+
+      async function checkMembershipStatus(userId) {
+        try {
+          console.log('🔍 Checking membership for:', userId);
+
+          const { data, error } = await supabase
+            .from('members')
+            .select('*')
+            .eq('line_user_id', userId)
+            .single();
+
+          if (error || !data) {
+            // User is NOT a member - show registration option
+            console.log('❌ Not a member yet');
+            document.getElementById('membershipCard').style.display = 'block';
+          } else {
+            // User IS a member - show member card
+            console.log('✅ User is a member:', data);
+            showMemberCard(data);
+          }
+        } catch (err) {
+          console.log('Membership check error:', err);
+          // Show registration option anyway
+          document.getElementById('membershipCard').style.display = 'block';
+        }
+      }
+
+      function showMemberCard(memberData) {
+        document.getElementById('membershipCard').innerHTML = `
+        <h3>⭐ Member Card</h3>
+        <p><strong>Name:</strong> ${memberData.display_name}</p>
+        <p><strong>Phone:</strong> ${memberData.phone}</p>
+        <p><strong>Points:</strong> ${memberData.points} pts</p>
+        <p style="font-size: 12px; color: #999;">Member since: ${new Date(memberData.created_at).toLocaleDateString()}</p>
+      `;
+        document.getElementById('membershipCard').style.display = 'block';
+      }
       // Show registration form
       window.showRegistrationForm = function () {
         document.getElementById('membershipCard').style.display = 'none';
