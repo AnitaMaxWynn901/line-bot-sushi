@@ -141,8 +141,6 @@
   </div>
 
   <script>
-
-    
     // ===== SUPABASE SETUP =====
     const SUPABASE_URL = 'https://rrppsqmcunaeouijzrly.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJycHBzcW1jdW5hZW91aWp6cmx5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgxNzYzMTEsImV4cCI6MjA4Mzc1MjMxMX0.oOh5Dox4S4k9nRjDGMYi1iFUbGSjsnx8_Fgd7n1EE-8';
@@ -150,47 +148,28 @@
     // Create Supabase client
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    // Function to show status on screen
-    function updateStatus(message, isError = false) {
-      const userInfo = document.getElementById('userInfo');
-      if (isError) {
-        userInfo.innerHTML = `<p style="color: red;">${message}</p>`;
-      } else {
-        userInfo.innerHTML = `<p>${message}</p>`;
-      }
-    }
-
     // ===== LIFF FUNCTIONS =====
     async function initializeLiff() {
       try {
-        updateStatus('🔄 Initializing LIFF...');
-
         await liff.init({ liffId: '2008845366-HByFMhkn' });
 
-        updateStatus('✅ LIFF initialized! Checking login...');
-
         if (liff.isLoggedIn()) {
-          updateStatus('✅ User logged in! Getting profile...');
-          await getUserProfile();
+          // User is logged in - get profile
+          getUserProfile();
         } else {
-          updateStatus('⚠️ Not logged in, redirecting to login...');
-          setTimeout(() => {
-            liff.login();
-          }, 1000);
+          // User not logged in - redirect to login
+          liff.login();
         }
       } catch (err) {
-        updateStatus('❌ LIFF Error: ' + err.message, true);
-        console.error('LIFF initialization failed:', err);
+        console.error('LIFF error:', err);
+        document.getElementById('userInfo').innerHTML =
+          '<p style="color: red;">Error: ' + err.message + '</p>';
       }
     }
 
     async function getUserProfile() {
       try {
-        updateStatus('🔄 Getting your profile...');
-
         const profile = await liff.getProfile();
-
-        updateStatus('✅ Profile loaded!');
 
         document.getElementById('userInfo').innerHTML = `
         <img src="${profile.pictureUrl}" alt="Profile">
@@ -199,8 +178,9 @@
         <p style="font-size: 12px; color: #999;">User ID: ${profile.userId}</p>
       `;
       } catch (err) {
-        updateStatus('❌ Profile Error: ' + err.message, true);
-        console.error('Error getting profile:', err);
+        console.error('Profile error:', err);
+        document.getElementById('userInfo').innerHTML =
+          '<p style="color: red;">Error getting profile: ' + err.message + '</p>';
       }
     }
 
@@ -221,25 +201,10 @@
       liff.closeWindow();
     }
 
-    // ===== START =====
-    window.onload = function () {
-      updateStatus('📱 Page loaded, starting...');
-
-      // Check if LIFF SDK loaded
-      if (typeof liff === 'undefined') {
-        updateStatus('❌ LIFF SDK not loaded!', true);
-        return;
-      }
-
-      // Check if Supabase loaded
-      if (typeof window.supabase === 'undefined') {
-        updateStatus('❌ Supabase SDK not loaded!', true);
-        return;
-      }
-
-      initializeLiff();
-    };
+    // ===== START IMMEDIATELY (NOT on window.onload) =====
+    initializeLiff();
   </script>
+
 </body>
 
 </html>
