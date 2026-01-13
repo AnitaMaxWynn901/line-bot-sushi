@@ -170,6 +170,23 @@
       window.closeLIFF = function () {
         liff.closeWindow();
       };
+
+      // Show registration form
+      window.showRegistrationForm = function () {
+        document.getElementById('membershipCard').style.display = 'none';
+        document.getElementById('registrationForm').style.display = 'block';
+      };
+
+      // Cancel registration
+      window.cancelRegistration = function () {
+        document.getElementById('registrationForm').style.display = 'none';
+        document.getElementById('membershipCard').style.display = 'block';
+      };
+
+      // Register member (placeholder for now)
+      window.registerMember = function () {
+        alert('Registration function - we will add this next!');
+      };
     })();
   </script>
 </body>
