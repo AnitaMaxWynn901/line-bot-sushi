@@ -21,6 +21,23 @@
       <p>Loading user info...</p>
     </div>
 
+    <!-- Membership Card (hidden initially) -->
+    <div class="card" id="membershipCard" style="display: none;">
+      <h3>🌟 Membership Program</h3>
+      <p>Join our membership to earn points and get exclusive rewards!</p>
+      <button class="btn btn-primary" onclick="showRegistrationForm()">Become a Member</button>
+    </div>
+
+    <!-- Registration Form (hidden initially) -->
+    <div class="card" id="registrationForm" style="display: none;">
+      <h3>📝 Member Registration</h3>
+      <p>Please provide your information:</p>
+      <input type="tel" id="phone" placeholder="Phone Number *" class="input-field">
+      <input type="email" id="email" placeholder="Email (optional)" class="input-field">
+      <button class="btn btn-primary" onclick="registerMember()">Register</button>
+      <button class="btn btn-secondary" onclick="cancelRegistration()">Cancel</button>
+    </div>
+
     <div class="menu-item">
       <div>
         <h3>🍣 Salmon Sushi</h3>
