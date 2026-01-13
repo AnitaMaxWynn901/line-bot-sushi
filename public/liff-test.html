@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>LIFF Test</title>
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+</head>
+<body>
+  <h1>LIFF Test</h1>
+  <div id="status">Loading...</div>
+  
+  <script>
+    const statusDiv = document.getElementById('status');
+    
+    window.onload = async function() {
+      try {
+        statusDiv.textContent = 'Initializing LIFF...';
+        await liff.init({ liffId: '2008845366-HByFMhkn' });
+        
+        statusDiv.textContent = 'LIFF OK! Checking login...';
+        
+        if (liff.isLoggedIn()) {
+          const profile = await liff.getProfile();
+          statusDiv.innerHTML = `
+            <p>✅ Success!</p>
+            <p>Name: ${profile.displayName}</p>
+          `;
+        } else {
+          statusDiv.textContent = 'Not logged in, redirecting...';
+          liff.login();
+        }
+      } catch (err) {
+        statusDiv.textContent = 'ERROR: ' + err.message;
+      }
+    };
+  </script>
+</body>
+</html>
