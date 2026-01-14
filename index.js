@@ -55,28 +55,50 @@ async function handleEvent(event) {
   const userMessage = event.message.text;
   const userMessageLower = userMessage.toLowerCase();
 
+  // ADD THESE DEBUG LOGS:
+  console.log("===========================================");
+  console.log("📨 RAW MESSAGE:", userMessage);
+  console.log("📨 LOWERCASE:", userMessageLower);
+  console.log("🔍 Contains 'hello'?", userMessageLower.includes("hello"));
+  console.log("🔍 Contains 'hi'?", userMessageLower.includes("hi"));
+  console.log(
+    "🔍 Contains 'membership'?",
+    userMessageLower.includes("membership")
+  );
+  console.log("🔍 Contains 'member'?", userMessageLower.includes("member"));
+  console.log("🔍 Contains 'points'?", userMessageLower.includes("points"));
+  console.log("🔍 Contains 'menu'?", userMessageLower.includes("menu"));
+  console.log("===========================================");
+
   let replyText;
 
   // Check if this is an order message
   if (userMessage.includes("🍣 NEW ORDER")) {
+    console.log("✅ ORDER DETECTED");
     return handleOrder(event, userMessage);
   }
 
   // Simple bot responses for regular messages
   if (userMessageLower.includes("hello") || userMessageLower.includes("hi")) {
+    console.log("✅ HELLO/HI DETECTED");
     replyText = "Hello! 👋 Welcome to Sushi Bot! How can I help you today?";
   } else if (
     userMessageLower.includes("membership") ||
     userMessageLower.includes("member") ||
     userMessageLower.includes("points")
   ) {
+    console.log("✅ MEMBERSHIP DETECTED - CALLING handleMembershipCheck");
     return handleMembershipCheck(event);
   } else if (userMessageLower.includes("menu")) {
+    console.log("✅ MENU DETECTED");
     replyText =
       "🍣 Our menu:\n- Salmon Sushi\n- Tuna Sushi\n- Unagi Sushi\n\nTap the LIFF button below to order!";
   } else {
+    console.log("✅ DEFAULT MESSAGE");
     replyText = `You said: "${event.message.text}"\n\nTap the LIFF button below to view our menu! 🍣`;
   }
+
+  console.log("📤 REPLYING WITH:", replyText);
 
   // Reply to user
   const echo = {
