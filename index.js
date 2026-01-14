@@ -1,11 +1,18 @@
 const express = require("express");
 const line = require("@line/bot-sdk");
+const { createClient } = require("@supabase/supabase-js");
 
 // Configuration
 const config = {
   channelSecret: process.env.CHANNEL_SECRET,
   channelAccessToken: process.env.CHANNEL_ACCESS_TOKEN,
 };
+
+// Supabase configuration - ADD THIS!
+const supabaseUrl = "https://rrppsqmcunaeouijzrly.supabase.co";
+const supabaseKey =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJycHBzcW1jdW5hZW91aWp6cmx5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgxNzYzMTEsImV4cCI6MjA4Mzc1MjMxMX0.oOh5Dox4S4k9nRjDGMYi1iFUbGSjsnx8_Fgd7n1EE-8";
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 // Create LINE SDK client
 const client = new line.messagingApi.MessagingApiClient({
@@ -126,6 +133,7 @@ async function handleOrder(event, orderMessage) {
     });
 
     console.log("✅ Order confirmation sent successfully");
+    await updateMemberPoints(userId, parseInt(points));
 
     //  Phase 3 - Save order to database and update member points
   } catch (error) {
@@ -145,6 +153,62 @@ async function handleOrder(event, orderMessage) {
     } catch (replyError) {
       console.error("Failed to send error message:", replyError);
     }
+  }
+}
+
+// Update member points in database
+async function updateMemberPoints(lineUserId, pointsToAdd) {
+  try {
+    console.log(
+      `💰 Updating points for user: ${lineUserId}, adding ${pointsToAdd} points`
+    );
+
+    // Check if user is a member
+    const { data: member, error: fetchError } = await supabase
+      .from("members")
+      .select("*")
+      .eq("line_user_id", lineUserId)
+      .single();
+
+    if (fetchError || !member) {
+      console.log("❌ User is not a member, skipping points update");
+      return;
+    }
+
+    // Calculate new points total
+    const currentPoints = member.points || 0;
+    const newPoints = currentPoints + pointsToAdd;
+
+    console.log(
+      `Current points: ${currentPoints}, Adding: ${pointsToAdd}, New total: ${newPoints}`
+    );
+
+    // Update points in database
+    const { data, error: updateError } = await supabase
+      .from("members")
+      .update({ points: newPoints })
+      .eq("line_user_id", lineUserId)
+      .select();
+
+    if (updateError) {
+      console.error("❌ Error updating points:", updateError);
+      return;
+    }
+
+    console.log("✅ Points updated successfully!", data);
+
+    // Send notification to user about points update
+    await client.pushMessage({
+      to: lineUserId,
+      messages: [
+        {
+          type: "text",
+          text: `🎉 Points Updated!\n\nYou earned ${pointsToAdd} points!\n💎 Total points: ${newPoints} pts`,
+        },
+      ],
+    });
+  } catch (error) {
+    console.error("❌ Error in updateMemberPoints:", error);
   }
 }
 
