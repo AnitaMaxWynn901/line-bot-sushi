@@ -78,17 +78,20 @@ async function handleEvent(event) {
     return handleOrder(event, userMessage);
   }
 
-  // Simple bot responses for regular messages
-  if (userMessageLower === "hello" || userMessageLower === "hi") {
-    console.log("✅ HELLO/HI DETECTED");
-    replyText = "Hello! 👋 Welcome to Sushi Bot! How can I help you today?";
-  } else if (
+  // CHECK MEMBERSHIP FIRST! (BEFORE HELLO/HI)
+  if (
     userMessageLower.includes("membership") ||
     userMessageLower.includes("member") ||
     userMessageLower.includes("points")
   ) {
     console.log("✅ MEMBERSHIP DETECTED - CALLING handleMembershipCheck");
     return handleMembershipCheck(event);
+  }
+
+  // Then check hello/hi
+  if (userMessageLower.includes("hello") || userMessageLower.includes("hi")) {
+    console.log("✅ HELLO/HI DETECTED");
+    replyText = "Hello! 👋 Welcome to Sushi Bot! How can I help you today?";
   } else if (userMessageLower.includes("menu")) {
     console.log("✅ MENU DETECTED");
     replyText =
