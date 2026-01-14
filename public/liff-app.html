@@ -39,27 +39,55 @@
     </div>
 
     <div class="menu-item">
-      <div>
+      <div class="item-details">
         <h3>🍣 Salmon Sushi</h3>
         <p>Fresh Norwegian salmon</p>
+        <div class="price">$12</div>
       </div>
-      <div class="price">$12</div>
+      <div class="item-actions">
+        <button class="qty-btn" onclick="removeFromCart('salmon')">−</button>
+        <span class="quantity" id="qty-salmon">0</span>
+        <button class="qty-btn" onclick="addToCart('salmon', 'Salmon Sushi', 12)">+</button>
+      </div>
     </div>
 
     <div class="menu-item">
-      <div>
+      <div class="item-details">
         <h3>🍣 Tuna Sushi</h3>
         <p>Premium bluefin tuna</p>
+        <div class="price">$15</div>
       </div>
-      <div class="price">$15</div>
+      <div class="item-actions">
+        <button class="qty-btn" onclick="removeFromCart('tuna')">−</button>
+        <span class="quantity" id="qty-tuna">0</span>
+        <button class="qty-btn" onclick="addToCart('tuna', 'Tuna Sushi', 15)">+</button>
+      </div>
     </div>
 
     <div class="menu-item">
-      <div>
+      <div class="item-details">
         <h3>🍣 Unagi Sushi</h3>
         <p>Grilled freshwater eel</p>
+        <div class="price">$18</div>
       </div>
-      <div class="price">$18</div>
+      <div class="item-actions">
+        <button class="qty-btn" onclick="removeFromCart('unagi')">−</button>
+        <span class="quantity" id="qty-unagi">0</span>
+        <button class="qty-btn" onclick="addToCart('unagi', 'Unagi Sushi', 18)">+</button>
+      </div>
+    </div>
+
+    <!-- Cart Summary (hidden initially) -->
+    <div class="cart-summary" id="cartSummary" style="display: none;">
+      <h4>🛒 Your Cart</h4>
+      <div id="cartItems"></div>
+      <div class="cart-total">
+        <span>Total:</span>
+        <span id="cartTotal">$0</span>
+      </div>
+      <div class="points-info" id="pointsInfo" style="display: none;">
+        🌟 You'll earn <strong><span id="pointsEarned">0</span> points</strong> with this order!
+      </div>
     </div>
 
     <button class="btn" onclick="sendMessage()">Order Now</button>
