@@ -79,7 +79,7 @@ async function handleEvent(event) {
   }
 
   // Simple bot responses for regular messages
-  if (userMessageLower.includes("hello") || userMessageLower.includes("hi")) {
+  if (userMessageLower === "hello" || userMessageLower === "hi") {
     console.log("✅ HELLO/HI DETECTED");
     replyText = "Hello! 👋 Welcome to Sushi Bot! How can I help you today?";
   } else if (
