@@ -68,9 +68,12 @@ async function handleEvent(event) {
   } else if (userMessageLower.includes("menu")) {
     replyText =
       "🍣 Our menu:\n- Salmon Sushi\n- Tuna Sushi\n- Unagi Sushi\n\nTap the LIFF button below to order!";
-  } else if (userMessageLower.includes("help")) {
-    replyText =
-      "I can help you with:\n✅ View menu\n✅ Place orders\n✅ Earn points\n\nTap the LIFF button to get started!";
+  } else if (
+    userMessageLower.includes("membership") ||
+    userMessageLower.includes("member") ||
+    userMessageLower.includes("points")
+  ) {
+    return handleMembershipCheck(event);
   } else {
     replyText = `You said: "${event.message.text}"\n\nTap the LIFF button below to view our menu! 🍣`;
   }
@@ -209,6 +212,79 @@ async function updateMemberPoints(lineUserId, pointsToAdd) {
     });
   } catch (error) {
     console.error("❌ Error in updateMemberPoints:", error);
+  }
+}
+
+// Check membership status
+async function handleMembershipCheck(event) {
+  try {
+    const userId = event.source.userId;
+
+    console.log("🔍 Checking membership for:", userId);
+
+    // Get member data from database
+    const { data: member, error } = await supabase
+      .from("members")
+      .select("*")
+      .eq("line_user_id", userId)
+      .single();
+
+    let replyMessage;
+
+    if (error || !member) {
+      // User is not a member
+      console.log("❌ User is not a member");
+      replyMessage = {
+        type: "text",
+        text:
+          "❌ You are not a member yet.\n\n" +
+          "Tap the LIFF button below to register and start earning points! 🌟\n\n" +
+          "Benefits:\n" +
+          "✅ Earn points on every order\n" +
+          "✅ Special member discounts\n" +
+          "✅ Exclusive promotions",
+      };
+    } else {
+      // User is a member - show their info
+      console.log("✅ Member found:", member);
+
+      const memberSince = new Date(member.created_at).toLocaleDateString(
+        "en-US",
+        {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        }
+      );
+
+      replyMessage = {
+        type: "text",
+        text:
+          "⭐ MEMBER CARD ⭐\n\n" +
+          `👤 Name: ${member.display_name}\n` +
+          `📱 Phone: ${member.phone}\n` +
+          `💎 Points: ${member.points} pts\n\n` +
+          `📅 Member since: ${memberSince}\n\n` +
+          "Keep ordering to earn more points! 🍣",
+      };
+    }
+
+    return client.replyMessage({
+      replyToken: event.replyToken,
+      messages: [replyMessage],
+    });
+  } catch (error) {
+    console.error("❌ Error checking membership:", error);
+
+    const errorMessage = {
+      type: "text",
+      text: "❌ Sorry, there was an error checking your membership.\nPlease try again later.",
+    };
+
+    return client.replyMessage({
+      replyToken: event.replyToken,
+      messages: [errorMessage],
+    });
   }
 }
 
