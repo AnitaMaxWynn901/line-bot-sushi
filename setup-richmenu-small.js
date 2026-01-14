@@ -42,18 +42,42 @@ async function uploadRichMenuImage(richMenuId, imagePath) {
   });
 }
 
+async function deleteOldRichMenus() {
+  try {
+    console.log('🗑️  Deleting old rich menus...');
+    
+    // Get list of all rich menus
+    const richMenuList = await client.getRichMenuList();
+    
+    if (richMenuList.richmenus && richMenuList.richmenus.length > 0) {
+      for (const menu of richMenuList.richmenus) {
+        console.log(`Deleting rich menu: ${menu.richMenuId}`);
+        await client.deleteRichMenu(menu.richMenuId);
+      }
+      console.log('✅ Old rich menus deleted!');
+    } else {
+      console.log('No old rich menus found.');
+    }
+  } catch (error) {
+    console.error('Error deleting old menus:', error.message);
+  }
+}
+
 async function createRichMenu() {
   try {
-    console.log('Creating rich menu (SMALL SIZE for better mobile view)...');
+    // Delete old rich menus first
+    await deleteOldRichMenus();
+    
+    console.log('Creating NEW rich menu with Membership button...');
 
-    // Step 1: Create rich menu structure - SMALL SIZE (843px height)
+    // Step 1: Create rich menu structure
     const richMenu = {
       size: {
         width: 2500,
-        height: 843  // ⚡ SMALL SIZE - takes up less screen space!
+        height: 843  // SMALL SIZE
       },
       selected: true,
-      name: 'Sushi Menu Small',
+      name: 'Sushi Menu with Membership',
       chatBarText: 'Menu',
       areas: [
         // Left section - Show Menu
@@ -66,7 +90,7 @@ async function createRichMenu() {
           },
           action: {
             type: 'message',
-            text: 'Show me the menu'
+            text: 'menu'  // Changed to simple "menu"
           }
         },
         // Middle section - Open LIFF
@@ -82,7 +106,7 @@ async function createRichMenu() {
             uri: 'https://liff.line.me/2008845366-HByFMhkn'
           }
         },
-        // Right section - Help
+        // Right section - Check Membership (CHANGED FROM HELP!)
         {
           bounds: {
             x: 1667,
@@ -92,7 +116,7 @@ async function createRichMenu() {
           },
           action: {
             type: 'message',
-            text: 'help'
+            text: 'check membership'  // ⭐ CHANGED!
           }
         }
       ]
@@ -104,20 +128,21 @@ async function createRichMenu() {
     
     console.log('✅ Rich menu created:', richMenuId);
 
-    // Step 2: Upload image using direct API call
+    // Step 2: Upload image
     console.log('Uploading image...');
     
-    const imagePath = './richmenu-small.png';
+    const imagePath = 'richmenu-small.png';
     
     // Check if image exists
     if (!fs.existsSync(imagePath)) {
       console.error('❌ Error: richmenu-small.png not found!');
-      console.log('Please create a richmenu-small.png image (2500 x 843 pixels) in the same folder.');
-      console.log('Note: This is HALF the height of the large version!');
+      console.log('Please update your richmenu-small.png image:');
+      console.log('- Change "Help" text to "Membership" or "Member Card"');
+      console.log('- Size: 2500 x 843 pixels');
+      console.log('- Right section should say "Membership" now');
       return;
     }
 
-    // Upload image using direct HTTPS request
     await uploadRichMenuImage(richMenuId, imagePath);
     console.log('✅ Image uploaded!');
 
@@ -127,12 +152,15 @@ async function createRichMenu() {
     
     console.log('✅ Set as default menu!');
     console.log('');
-    console.log('🎉 Rich menu setup complete!');
+    console.log('🎉 Rich menu updated successfully!');
     console.log('Rich Menu ID:', richMenuId);
-    console.log('This smaller menu will take up less space on mobile! 📱');
     console.log('');
-    console.log('Now open your LINE bot and you should see the compact menu at the bottom!');
-    console.log('It might take 1-2 minutes to appear.');
+    console.log('Changes:');
+    console.log('- Right button now triggers "check membership"');
+    console.log('- Bot will show member card when tapped');
+    console.log('');
+    console.log('⚠️  IMPORTANT: Update your richmenu-small.png image!');
+    console.log('   Change the "Help" text to "Membership" in the image.');
 
   } catch (error) {
     console.error('❌ Error:', error.message);
@@ -142,5 +170,6 @@ async function createRichMenu() {
     }
   }
 }
+
 // Run the function
 createRichMenu();
