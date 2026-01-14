@@ -116,7 +116,7 @@ async function createRichMenu() {
           },
           action: {
             type: 'message',
-            text: 'check membership'  // ⭐ CHANGED!
+            text: 'membership'  // ⭐ CHANGED!
           }
         }
       ]
