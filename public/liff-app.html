@@ -90,7 +90,7 @@
       </div>
     </div>
 
-    <button class="btn" onclick="sendMessage()">Order Now</button>
+    <button class="btn" onclick="placeOrder()">Order Now</button>
     <button class="btn" onclick="closeLIFF()">Close</button>
   </div>
 
@@ -107,7 +107,7 @@
       // Step 2: Wait for Supabase SDK to load
       let supabaseWaitCount = 0;
       while (typeof window.supabase === 'undefined' && supabaseWaitCount < 50) {
-        await new Promise(resolve => setTimeout(resolve, 100)); // Wait 100ms
+        await new Promise(resolve => setTimeout(resolve, 100));
         supabaseWaitCount++;
       }
 
@@ -123,7 +123,7 @@
       // Step 3: Wait for LIFF SDK to load
       let liffWaitCount = 0;
       while (typeof liff === 'undefined' && liffWaitCount < 50) {
-        await new Promise(resolve => setTimeout(resolve, 100)); // Wait 100ms
+        await new Promise(resolve => setTimeout(resolve, 100));
         liffWaitCount++;
       }
 
@@ -142,6 +142,15 @@
 
       const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
       console.log('✅ Supabase client created');
+
+      // ===== SHOPPING CART =====
+      let cart = {};
+
+      const menuItems = {
+        salmon: { name: 'Salmon Sushi', price: 12 },
+        tuna: { name: 'Tuna Sushi', price: 15 },
+        unagi: { name: 'Unagi Sushi', price: 18 }
+      };
 
       // Step 5: Initialize LIFF
       try {
@@ -170,13 +179,13 @@
           console.log('✅ Profile loaded:', profile);
 
           document.getElementById('userInfo').innerHTML = `
-          <img src="${profile.pictureUrl}" alt="Profile">
-          <h3>Hello, ${profile.displayName}! 👋</h3>
-          <p>Welcome to our sushi restaurant</p>
-          <p style="font-size: 12px; color: #999;">User ID: ${profile.userId}</p>
-        `;
+            <img src="${profile.pictureUrl}" alt="Profile">
+            <h3>Hello, ${profile.displayName}! 👋</h3>
+            <p>Welcome to our sushi restaurant</p>
+            <p style="font-size: 12px; color: #999;">User ID: ${profile.userId}</p>
+          `;
+
           await checkMembershipStatus(profile.userId);
-          // NOW you can use Supabase here to check if user is registered
           console.log('Supabase is ready to use!');
         } catch (err) {
           console.error('❌ Profile error:', err);
@@ -185,18 +194,120 @@
         }
       }
 
-      // Make functions available globally for onclick handlers
-      window.sendMessage = function () {
-        liff.sendMessages([{
-          type: 'text',
-          text: 'I want to make an order! 🍣'
-        }])
-          .then(() => alert('Message sent!'))
-          .catch((error) => alert('Error: ' + error.message));
+      // ===== SHOPPING CART FUNCTIONS =====
+
+      window.addToCart = function (itemId, itemName, itemPrice) {
+        if (!cart[itemId]) {
+          cart[itemId] = 0;
+        }
+        cart[itemId]++;
+        updateCartDisplay();
+        console.log('Added to cart:', itemId, 'New quantity:', cart[itemId]);
       };
 
-      window.closeLIFF = function () {
-        liff.closeWindow();
+      window.removeFromCart = function (itemId) {
+        if (cart[itemId] && cart[itemId] > 0) {
+          cart[itemId]--;
+          if (cart[itemId] === 0) {
+            delete cart[itemId];
+          }
+          updateCartDisplay();
+          console.log('Removed from cart:', itemId);
+        }
+      };
+
+      function updateCartDisplay() {
+        Object.keys(menuItems).forEach(itemId => {
+          const qtyElement = document.getElementById('qty-' + itemId);
+          if (qtyElement) {
+            qtyElement.textContent = cart[itemId] || 0;
+          }
+        });
+
+        let total = 0;
+        let itemCount = 0;
+
+        Object.keys(cart).forEach(itemId => {
+          const quantity = cart[itemId];
+          const price = menuItems[itemId].price;
+          total += quantity * price;
+          itemCount += quantity;
+        });
+
+        const cartSummary = document.getElementById('cartSummary');
+        if (itemCount > 0) {
+          cartSummary.style.display = 'block';
+
+          let cartHTML = '';
+          Object.keys(cart).forEach(itemId => {
+            const quantity = cart[itemId];
+            const item = menuItems[itemId];
+            const subtotal = quantity * item.price;
+
+            cartHTML += `
+              <div class="cart-item">
+                <span>${quantity}x ${item.name}</span>
+                <span>$${subtotal}</span>
+              </div>
+            `;
+          });
+
+          document.getElementById('cartItems').innerHTML = cartHTML;
+          document.getElementById('cartTotal').textContent = '$' + total;
+
+          const pointsEarned = Math.floor(total / 10);
+
+          if (pointsEarned > 0) {
+            document.getElementById('pointsEarned').textContent = pointsEarned;
+            document.getElementById('pointsInfo').style.display = 'block';
+          } else {
+            document.getElementById('pointsInfo').style.display = 'none';
+          }
+        } else {
+          cartSummary.style.display = 'none';
+        }
+      }
+
+      window.placeOrder = async function () {
+        const itemCount = Object.keys(cart).reduce((sum, itemId) => sum + cart[itemId], 0);
+
+        if (itemCount === 0) {
+          alert('🛒 Your cart is empty! Please add items first.');
+          return;
+        }
+
+        let orderMessage = '🍣 NEW ORDER\n\n';
+        let total = 0;
+
+        Object.keys(cart).forEach(itemId => {
+          const quantity = cart[itemId];
+          const item = menuItems[itemId];
+          const subtotal = quantity * item.price;
+          total += subtotal;
+
+          orderMessage += `${quantity}x ${item.name} - $${subtotal}\n`;
+        });
+
+        const pointsEarned = Math.floor(total / 10);
+
+        orderMessage += `\n💰 Total: $${total}`;
+        orderMessage += `\n⭐ Points earned: ${pointsEarned}`;
+
+        console.log('Placing order:', orderMessage);
+
+        try {
+          await liff.sendMessages([{
+            type: 'text',
+            text: orderMessage
+          }]);
+
+          alert('✅ Order sent! Check your chat.');
+          cart = {};
+          updateCartDisplay();
+        } catch (error) {
+          console.error('Error sending order:', error);
+          alert('❌ Error: ' + error.message);
+        }
       };
 
       // ===== MEMBERSHIP DATABASE FUNCTIONS =====
@@ -212,51 +323,43 @@
             .single();
 
           if (error || !data) {
-            // User is NOT a member - show registration option
             console.log('❌ Not a member yet');
             document.getElementById('membershipCard').style.display = 'block';
           } else {
-            // User IS a member - show member card
             console.log('✅ User is a member:', data);
             showMemberCard(data);
           }
         } catch (err) {
           console.log('Membership check error:', err);
-          // Show registration option anyway
           document.getElementById('membershipCard').style.display = 'block';
         }
       }
 
       function showMemberCard(memberData) {
         document.getElementById('membershipCard').innerHTML = `
-        <h3>⭐ Member Card</h3>
-        <p><strong>Name:</strong> ${memberData.display_name}</p>
-        <p><strong>Phone:</strong> ${memberData.phone}</p>
-        <p><strong>Points:</strong> ${memberData.points} pts</p>
-        <p style="font-size: 12px; color: #999;">Member since: ${new Date(memberData.created_at).toLocaleDateString()}</p>
-      `;
+          <h3>⭐ Member Card</h3>
+          <p><strong>Name:</strong> ${memberData.display_name}</p>
+          <p><strong>Phone:</strong> ${memberData.phone}</p>
+          <p><strong>Points:</strong> ${memberData.points} pts</p>
+          <p style="font-size: 12px; color: #999;">Member since: ${new Date(memberData.created_at).toLocaleDateString()}</p>
+        `;
         document.getElementById('membershipCard').style.display = 'block';
       }
-      // Show registration form
+
       window.showRegistrationForm = function () {
         document.getElementById('membershipCard').style.display = 'none';
         document.getElementById('registrationForm').style.display = 'block';
       };
 
-      // Cancel registration
       window.cancelRegistration = function () {
         document.getElementById('registrationForm').style.display = 'none';
         document.getElementById('membershipCard').style.display = 'block';
       };
 
-      // Register member (placeholder for now)
-      // Register member - SAVE TO DATABASE
       window.registerMember = async function () {
-        // Get form values
         const phone = document.getElementById('phone').value.trim();
         const email = document.getElementById('email').value.trim();
 
-        // Validation - phone is required
         if (!phone) {
           alert('❌ Please enter your phone number');
           return;
@@ -268,7 +371,6 @@
         }
 
         try {
-          // Get user profile from LIFF
           const profile = await liff.getProfile();
 
           console.log('📝 Registering member:', {
@@ -278,18 +380,15 @@
             email: email
           });
 
-          // Insert into Supabase database
           const { data, error } = await supabase
             .from('members')
-            .insert([
-              {
-                line_user_id: profile.userId,
-                display_name: profile.displayName,
-                phone: phone,
-                email: email || null,
-                points: 0
-              }
-            ])
+            .insert([{
+              line_user_id: profile.userId,
+              display_name: profile.displayName,
+              phone: phone,
+              email: email || null,
+              points: 0
+            }])
             .select();
 
           if (error) {
@@ -299,25 +398,23 @@
           }
 
           console.log('✅ Registration successful:', data);
-
-          // Show success message
           alert('🎉 Welcome! You are now a member!');
 
-          // Hide registration form
           document.getElementById('registrationForm').style.display = 'none';
-
-          // Show member card with new data
           showMemberCard(data[0]);
 
-          // Clear form
           document.getElementById('phone').value = '';
           document.getElementById('email').value = '';
-
         } catch (err) {
           console.error('❌ Error:', err);
           alert('❌ Something went wrong. Please try again.');
         }
       };
+
+      window.closeLIFF = function () {
+        liff.closeWindow();
+      };
+
     })();
   </script>
 </body>
