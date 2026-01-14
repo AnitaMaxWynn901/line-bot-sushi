@@ -65,15 +65,15 @@ async function handleEvent(event) {
   // Simple bot responses for regular messages
   if (userMessageLower.includes("hello") || userMessageLower.includes("hi")) {
     replyText = "Hello! 👋 Welcome to Sushi Bot! How can I help you today?";
-  } else if (userMessageLower.includes("menu")) {
-    replyText =
-      "🍣 Our menu:\n- Salmon Sushi\n- Tuna Sushi\n- Unagi Sushi\n\nTap the LIFF button below to order!";
   } else if (
     userMessageLower.includes("membership") ||
     userMessageLower.includes("member") ||
     userMessageLower.includes("points")
   ) {
     return handleMembershipCheck(event);
+  } else if (userMessageLower.includes("menu")) {
+    replyText =
+      "🍣 Our menu:\n- Salmon Sushi\n- Tuna Sushi\n- Unagi Sushi\n\nTap the LIFF button below to order!";
   } else {
     replyText = `You said: "${event.message.text}"\n\nTap the LIFF button below to view our menu! 🍣`;
   }
