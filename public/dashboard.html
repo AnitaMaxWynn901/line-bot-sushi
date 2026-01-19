@@ -183,6 +183,18 @@
       margin-bottom: 20px;
     }
 
+    .debug {
+      background: #333;
+      color: #0f0;
+      padding: 10px;
+      border-radius: 5px;
+      margin: 10px 0;
+      font-size: 12px;
+      font-family: monospace;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
     .progress-bar {
       background: #eee;
       border-radius: 10px;
@@ -215,6 +227,12 @@
     <div class="header">
       <h1>📊 Member Dashboard</h1>
       <p>Your complete membership overview</p>
+    </div>
+
+    <!-- DEBUG OUTPUT -->
+    <div class="debug" id="debugLog">
+      🔍 Debug Log:<br>
+      Initializing...
     </div>
 
     <div id="loadingMessage" class="loading">
@@ -283,61 +301,115 @@
 
     let supabase;
     let userProfile;
+    
+    // Debug logging function
+    function debugLog(message) {
+      const debugDiv = document.getElementById('debugLog');
+      debugDiv.innerHTML += '<br>' + message;
+      console.log(message);
+      debugDiv.scrollTop = debugDiv.scrollHeight;
+    }
 
     (async function () {
       try {
+        debugLog('✅ Script started');
+        
         // Wait for Supabase SDK
-        while (typeof window.supabase === 'undefined') {
+        debugLog('⏳ Waiting for Supabase SDK...');
+        let supabaseWait = 0;
+        while (typeof window.supabase === 'undefined' && supabaseWait < 50) {
           await new Promise(resolve => setTimeout(resolve, 100));
+          supabaseWait++;
         }
+        
+        if (typeof window.supabase === 'undefined') {
+          debugLog('❌ Supabase SDK failed to load');
+          showError('Supabase SDK not loaded');
+          return;
+        }
+        
+        debugLog('✅ Supabase SDK loaded');
         supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        debugLog('✅ Supabase client created');
 
         // Wait for LIFF SDK
-        while (typeof liff === 'undefined') {
+        debugLog('⏳ Waiting for LIFF SDK...');
+        let liffWait = 0;
+        while (typeof liff === 'undefined' && liffWait < 50) {
           await new Promise(resolve => setTimeout(resolve, 100));
+          liffWait++;
         }
+        
+        if (typeof liff === 'undefined') {
+          debugLog('❌ LIFF SDK failed to load');
+          showError('LIFF SDK not loaded');
+          return;
+        }
+        
+        debugLog('✅ LIFF SDK loaded');
 
         // Initialize LIFF
+        debugLog('⏳ Initializing LIFF with ID: 2008845366-m8PxiFt0');
         await liff.init({ liffId: '2008845366-m8PxiFt0' });
+        debugLog('✅ LIFF initialized');
 
         if (liff.isLoggedIn()) {
+          debugLog('✅ User is logged in');
           userProfile = await liff.getProfile();
+          debugLog('✅ Profile loaded: ' + userProfile.displayName);
+          debugLog('👤 User ID: ' + userProfile.userId.substring(0, 20) + '...');
           await loadDashboard();
         } else {
+          debugLog('⚠️ User not logged in, redirecting to login...');
           liff.login();
         }
       } catch (err) {
-        console.error('Error:', err);
+        debugLog('❌ ERROR: ' + err.message);
+        console.error('Full error:', err);
         showError('Failed to load dashboard: ' + err.message);
       }
     })();
 
     async function loadDashboard() {
       try {
-        console.log('Loading dashboard for:', userProfile.userId);
+        debugLog('📊 Loading dashboard for: ' + userProfile.userId);
 
         // Fetch member data
+        debugLog('⏳ Fetching member data from Supabase...');
         const { data: member, error } = await supabase
           .from('members')
           .select('*')
           .eq('line_user_id', userProfile.userId)
           .single();
 
-        if (error || !member) {
+        if (error) {
+          debugLog('❌ Supabase error: ' + error.message);
+          showError('Database error: ' + error.message);
+          return;
+        }
+
+        if (!member) {
+          debugLog('❌ Member not found in database');
           showError('Member not found. Please register first.');
           return;
         }
+
+        debugLog('✅ Member found: ' + member.display_name);
+        debugLog('💎 Points: ' + member.points);
 
         // Display dashboard
         displayDashboard(member);
 
       } catch (err) {
+        debugLog('❌ Dashboard error: ' + err.message);
         console.error('Dashboard error:', err);
         showError('Error loading dashboard');
       }
     }
 
     function displayDashboard(member) {
+      debugLog('🎨 Rendering dashboard...');
+      
       // Hide loading
       document.getElementById('loadingMessage').style.display = 'none';
       document.getElementById('dashboardContent').style.display = 'block';
@@ -382,12 +454,16 @@
         day: 'numeric'
       });
       document.getElementById('memberSince').textContent = memberSince;
+      
+      debugLog('✅ Dashboard rendered successfully!');
     }
 
     function showError(message) {
       document.getElementById('loadingMessage').style.display = 'none';
       const container = document.querySelector('.container');
-      container.innerHTML = `
+      const debugDiv = document.getElementById('debugLog');
+      
+      container.innerHTML = debugDiv.outerHTML + `
         <div class="error">
           ❌ ${message}
         </div>
@@ -396,11 +472,12 @@
     }
 
     function openMenu() {
-      // Navigate back to main LIFF app
-      window.location.href = 'liff-app.html';
+      debugLog('🍣 Opening menu...');
+      window.location.href = '/liff-app.html';
     }
 
     function closeLIFF() {
+      debugLog('👋 Closing LIFF...');
       liff.closeWindow();
     }
   </script>
