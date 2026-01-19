@@ -155,4 +155,269 @@ async function getMemberDashboardFlex(userId) {
 
 module.exports = {
   getMemberDashboardFlex,
+  getPromotionsFlex,
 };
+
+// Promotions Carousel Flex Message
+function getPromotionsFlex() {
+  return {
+    type: "flex",
+    altText: "🎉 Current Promotions - Swipe to see all deals!",
+    contents: {
+      type: "carousel",
+      contents: [
+        // Card 1: Happy Hour Special
+        {
+          type: "bubble",
+          size: "kilo",
+          hero: {
+            type: "box",
+            layout: "vertical",
+            contents: [
+              {
+                type: "text",
+                text: "🍱",
+                size: "4xl",
+                align: "center",
+              },
+              {
+                type: "text",
+                text: "20% OFF",
+                size: "3xl",
+                weight: "bold",
+                color: "#ffffff",
+                align: "center",
+                margin: "md",
+              },
+            ],
+            backgroundColor: "#FF6B6B",
+            paddingAll: "30px",
+          },
+          body: {
+            type: "box",
+            layout: "vertical",
+            contents: [
+              {
+                type: "text",
+                text: "HAPPY HOUR SPECIAL",
+                weight: "bold",
+                size: "xl",
+                wrap: true,
+              },
+              {
+                type: "text",
+                text: "20% off all sushi",
+                size: "md",
+                color: "#FF6B6B",
+                margin: "md",
+                weight: "bold",
+              },
+              {
+                type: "text",
+                text: "⏰ 3:00 PM - 5:00 PM Daily",
+                size: "sm",
+                color: "#999999",
+                margin: "md",
+              },
+              {
+                type: "text",
+                text: "Come enjoy our delicious sushi at a special price during happy hour!",
+                size: "xs",
+                color: "#666666",
+                margin: "md",
+                wrap: true,
+              },
+            ],
+            paddingAll: "20px",
+          },
+          footer: {
+            type: "box",
+            layout: "vertical",
+            contents: [
+              {
+                type: "button",
+                style: "primary",
+                height: "sm",
+                action: {
+                  type: "uri",
+                  label: "View Details 📋",
+                  uri: "https://liff.line.me/2008845366-m8PxiFt0/promotions.html?promo=happy-hour",
+                },
+                color: "#FF6B6B",
+              },
+            ],
+            paddingAll: "15px",
+          },
+        },
+
+        // Card 2: New Member Bonus
+        {
+          type: "bubble",
+          size: "kilo",
+          hero: {
+            type: "box",
+            layout: "vertical",
+            contents: [
+              {
+                type: "text",
+                text: "⭐",
+                size: "4xl",
+                align: "center",
+              },
+              {
+                type: "text",
+                text: "10 POINTS",
+                size: "3xl",
+                weight: "bold",
+                color: "#ffffff",
+                align: "center",
+                margin: "md",
+              },
+            ],
+            backgroundColor: "#4ECDC4",
+            paddingAll: "30px",
+          },
+          body: {
+            type: "box",
+            layout: "vertical",
+            contents: [
+              {
+                type: "text",
+                text: "NEW MEMBER BONUS",
+                weight: "bold",
+                size: "xl",
+                wrap: true,
+              },
+              {
+                type: "text",
+                text: "Get 10 Points Free!",
+                size: "md",
+                color: "#4ECDC4",
+                margin: "md",
+                weight: "bold",
+              },
+              {
+                type: "text",
+                text: "🎁 For first-time members",
+                size: "sm",
+                color: "#999999",
+                margin: "md",
+              },
+              {
+                type: "text",
+                text: "Register now and start earning rewards on every order!",
+                size: "xs",
+                color: "#666666",
+                margin: "md",
+                wrap: true,
+              },
+            ],
+            paddingAll: "20px",
+          },
+          footer: {
+            type: "box",
+            layout: "vertical",
+            contents: [
+              {
+                type: "button",
+                style: "primary",
+                height: "sm",
+                action: {
+                  type: "uri",
+                  label: "View Details 📋",
+                  uri: "https://liff.line.me/2008845366-m8PxiFt0/promotions.html?promo=new-member",
+                },
+                color: "#4ECDC4",
+              },
+            ],
+            paddingAll: "15px",
+          },
+        },
+
+        // Card 3: Refer a Friend
+        {
+          type: "bubble",
+          size: "kilo",
+          hero: {
+            type: "box",
+            layout: "vertical",
+            contents: [
+              {
+                type: "text",
+                text: "👥",
+                size: "4xl",
+                align: "center",
+              },
+              {
+                type: "text",
+                text: "5 POINTS EACH",
+                size: "3xl",
+                weight: "bold",
+                color: "#ffffff",
+                align: "center",
+                margin: "md",
+              },
+            ],
+            backgroundColor: "#FFB84D",
+            paddingAll: "30px",
+          },
+          body: {
+            type: "box",
+            layout: "vertical",
+            contents: [
+              {
+                type: "text",
+                text: "REFER A FRIEND",
+                weight: "bold",
+                size: "xl",
+                wrap: true,
+              },
+              {
+                type: "text",
+                text: "Both Get 5 Points",
+                size: "md",
+                color: "#FFB84D",
+                margin: "md",
+                weight: "bold",
+              },
+              {
+                type: "text",
+                text: "🎊 Share the love of sushi!",
+                size: "sm",
+                color: "#999999",
+                margin: "md",
+              },
+              {
+                type: "text",
+                text: "Invite your friends and both of you earn bonus points!",
+                size: "xs",
+                color: "#666666",
+                margin: "md",
+                wrap: true,
+              },
+            ],
+            paddingAll: "20px",
+          },
+          footer: {
+            type: "box",
+            layout: "vertical",
+            contents: [
+              {
+                type: "button",
+                style: "primary",
+                height: "sm",
+                action: {
+                  type: "uri",
+                  label: "View Details 📋",
+                  uri: "https://liff.line.me/2008845366-m8PxiFt0/promotions.html?promo=refer-friend",
+                },
+                color: "#FFB84D",
+              },
+            ],
+            paddingAll: "15px",
+          },
+        },
+      ],
+    },
+  };
+}

@@ -1,7 +1,7 @@
 const express = require("express");
 const line = require("@line/bot-sdk");
 const { createClient } = require("@supabase/supabase-js");
-const { getMemberDashboardFlex } = require("./flexMessages"); // Import Flex Messages
+const { getMemberDashboardFlex, getPromotionsFlex } = require("./flexMessages"); // Import Flex Messages
 
 // Configuration
 const config = {
@@ -80,6 +80,17 @@ async function handleEvent(event) {
     return sendMemberDashboard(event);
   }
 
+  // NEW: Check for PROMOTIONS command
+  if (
+    userMessageLower === "promotions" ||
+    userMessageLower === "promo" ||
+    userMessageLower === "deals" ||
+    userMessageLower === "offers"
+  ) {
+    console.log("✅ PROMOTIONS COMMAND DETECTED");
+    return sendPromotions(event);
+  }
+
   // Check membership status (for longer queries)
   if (
     userMessageLower.includes("membership") ||
@@ -121,6 +132,34 @@ async function handleEvent(event) {
     replyToken: event.replyToken,
     messages: [echo],
   });
+}
+
+// NEW FUNCTION: Send Promotions Carousel
+async function sendPromotions(event) {
+  try {
+    console.log("🎉 Sending Promotions Carousel");
+
+    // Get the Flex Message carousel
+    const flexMessage = getPromotionsFlex();
+
+    // Send the carousel
+    return client.replyMessage({
+      replyToken: event.replyToken,
+      messages: [flexMessage],
+    });
+  } catch (error) {
+    console.error("❌ Error sending Promotions:", error);
+
+    const errorMessage = {
+      type: "text",
+      text: "❌ Sorry, there was an error loading promotions.\nPlease try again later.",
+    };
+
+    return client.replyMessage({
+      replyToken: event.replyToken,
+      messages: [errorMessage],
+    });
+  }
 }
 
 // NEW FUNCTION: Send Member Dashboard Flex Message
