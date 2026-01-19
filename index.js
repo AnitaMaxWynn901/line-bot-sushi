@@ -381,5 +381,5 @@ const port = process.env.PORT || 3000;
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
   console.log(`Webhook URL: /webhook`);
-  console.log(`LIFF URL: ${LIFF_URL}`);
+  console.log(`Server URL: ${SERVER_URL}`);
 });
