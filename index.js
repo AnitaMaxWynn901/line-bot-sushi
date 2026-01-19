@@ -15,8 +15,10 @@ const supabaseKey =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJycHBzcW1jdW5hZW91aWp6cmx5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgxNzYzMTEsImV4cCI6MjA4Mzc1MjMxMX0.oOh5Dox4S4k9nRjDGMYi1iFUbGSjsnx8_Fgd7n1EE-8";
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-// LIFF URL - CHANGE THIS TO YOUR ACTUAL LIFF URL
-const LIFF_URL = "https://liff.line.me/2008845366-HByFMhkn";
+// SERVER URL - CHANGE THIS TO YOUR RENDER SERVER URL
+// This is where your dashboard.html is hosted
+// Example: "https://your-app-name.onrender.com"
+const SERVER_URL = "https://line-bot-sushi.onrender.com";
 
 // Create LINE SDK client
 const client = new line.messagingApi.MessagingApiClient({
@@ -134,7 +136,7 @@ async function sendMemberDashboard(event) {
     console.log("📊 Sending Member Dashboard to:", userId);
 
     // Get the Flex Message
-    const flexMessage = await getMemberDashboardFlex(userId, LIFF_URL);
+    const flexMessage = await getMemberDashboardFlex(userId, SERVER_URL);
 
     if (!flexMessage) {
       // User is not a member
