@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Promotions</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 20px;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    .header {
+      background: white;
+      padding: 25px;
+      border-radius: 15px;
+      text-align: center;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .header h1 {
+      color: #333;
+      font-size: 28px;
+      margin-bottom: 10px;
+    }
+
+    .promo-card {
+      background: white;
+      border-radius: 15px;
+      overflow: hidden;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .promo-header {
+      padding: 40px 20px;
+      text-align: center;
+      color: white;
+    }
+
+    .promo-header.happy-hour {
+      background: linear-gradient(135deg, #FF6B6B 0%, #FF5252 100%);
+    }
+
+    .promo-header.new-member {
+      background: linear-gradient(135deg, #4ECDC4 0%, #44A5A0 100%);
+    }
+
+    .promo-header.refer-friend {
+      background: linear-gradient(135deg, #FFB84D 0%, #FFA51A 100%);
+    }
+
+    .promo-icon {
+      font-size: 60px;
+      margin-bottom: 15px;
+    }
+
+    .promo-title {
+      font-size: 32px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .promo-subtitle {
+      font-size: 18px;
+      opacity: 0.9;
+    }
+
+    .promo-body {
+      padding: 30px 20px;
+    }
+
+    .promo-section {
+      margin-bottom: 25px;
+    }
+
+    .promo-section h3 {
+      color: #333;
+      font-size: 18px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .promo-section p {
+      color: #666;
+      line-height: 1.6;
+      font-size: 15px;
+    }
+
+    .promo-list {
+      list-style: none;
+      padding: 0;
+    }
+
+    .promo-list li {
+      padding: 10px 0;
+      padding-left: 30px;
+      position: relative;
+      color: #666;
+    }
+
+    .promo-list li:before {
+      content: "✓";
+      position: absolute;
+      left: 0;
+      color: #4ECDC4;
+      font-weight: bold;
+      font-size: 18px;
+    }
+
+    .btn {
+      background: #667eea;
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      border-radius: 25px;
+      font-size: 16px;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 10px;
+      text-decoration: none;
+      display: block;
+      text-align: center;
+    }
+
+    .btn:hover {
+      background: #5568d3;
+    }
+
+    .terms {
+      background: #f5f5f5;
+      padding: 15px;
+      border-radius: 10px;
+      margin-top: 20px;
+    }
+
+    .terms h4 {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 10px;
+    }
+
+    .terms p {
+      font-size: 12px;
+      color: #999;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🎉 Promotions</h1>
+      <p>Special offers just for you!</p>
+    </div>
+
+    <!-- Content will be filled by JavaScript based on URL parameter -->
+    <div id="promoContent"></div>
+
+    <button class="btn" onclick="goBack()">← Back to Chat</button>
+  </div>
+
+  <script>
+    // Get the promo parameter from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const promoType = urlParams.get('promo');
+
+    // Promotion details
+    const promotions = {
+      'happy-hour': {
+        class: 'happy-hour',
+        icon: '🍱',
+        title: '20% OFF',
+        subtitle: 'Happy Hour Special',
+        description: 'Enjoy 20% off all sushi items during our happy hour! Perfect for an afternoon sushi break.',
+        time: '⏰ 3:00 PM - 5:00 PM Daily',
+        benefits: [
+          'Applies to all sushi items on our menu',
+          'Dine-in and takeout available',
+          'Valid every day of the week',
+          'Can be combined with member points'
+        ],
+        terms: 'Offer valid during happy hour times only. Cannot be combined with other promotional discounts. Member points can still be earned on discounted purchases.'
+      },
+      'new-member': {
+        class: 'new-member',
+        icon: '⭐',
+        title: '10 POINTS',
+        subtitle: 'New Member Bonus',
+        description: 'Welcome to our rewards program! Get 10 bonus points when you register as a new member.',
+        time: '🎁 One-time bonus for new members',
+        benefits: [
+          'Instant 10 points credited to your account',
+          'Start earning rewards immediately',
+          'Exclusive member-only promotions',
+          'Track your points and rewards easily'
+        ],
+        terms: 'Offer valid for new member registrations only. Points will be credited upon successful registration. One bonus per member.'
+      },
+      'refer-friend': {
+        class: 'refer-friend',
+        icon: '👥',
+        title: '5 POINTS',
+        subtitle: 'Refer a Friend',
+        description: 'Share the love of sushi! When you refer a friend who becomes a member, both of you get 5 bonus points.',
+        time: '🎊 Unlimited referrals',
+        benefits: [
+          'You get 5 points for each successful referral',
+          'Your friend gets 5 points when they join',
+          'No limit on number of referrals',
+          'Easy sharing through LINE'
+        ],
+        terms: 'Points awarded when referred friend completes registration. Both parties must be registered members. Referred friend must use your unique referral code or link.'
+      }
+    };
+
+    // Display the promotion details
+    function displayPromotion() {
+      const promo = promotions[promoType];
+      
+      if (!promo) {
+        document.getElementById('promoContent').innerHTML = `
+          <div class="promo-card">
+            <div class="promo-body">
+              <h3>❌ Promotion not found</h3>
+              <p>Sorry, we couldn't find that promotion.</p>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      const benefitsList = promo.benefits.map(benefit => `<li>${benefit}</li>`).join('');
+
+      document.getElementById('promoContent').innerHTML = `
+        <div class="promo-card">
+          <div class="promo-header ${promo.class}">
+            <div class="promo-icon">${promo.icon}</div>
+            <div class="promo-title">${promo.title}</div>
+            <div class="promo-subtitle">${promo.subtitle}</div>
+          </div>
+          <div class="promo-body">
+            <div class="promo-section">
+              <h3>📝 About This Offer</h3>
+              <p>${promo.description}</p>
+            </div>
+
+            <div class="promo-section">
+              <h3>⏰ When</h3>
+              <p>${promo.time}</p>
+            </div>
+
+            <div class="promo-section">
+              <h3>✨ Benefits</h3>
+              <ul class="promo-list">
+                ${benefitsList}
+              </ul>
+            </div>
+
+            <div class="terms">
+              <h4>Terms & Conditions:</h4>
+              <p>${promo.terms}</p>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // Display promotion on page load
+    displayPromotion();
+
+    function goBack() {
+      window.history.back();
+    }
+  </script>
+</body>
+</html>

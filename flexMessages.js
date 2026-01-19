@@ -241,7 +241,7 @@ function getPromotionsFlex() {
                 action: {
                   type: "uri",
                   label: "View Details 📋",
-                  uri: "https://liff.line.me/2008845366-m8PxiFt0/promotions.html?promo=happy-hour",
+                  uri: "https://line-bot-sushi.onrender.com/promotions.html?promo=happy-hour",
                 },
                 color: "#FF6B6B",
               },
@@ -325,7 +325,7 @@ function getPromotionsFlex() {
                 action: {
                   type: "uri",
                   label: "View Details 📋",
-                  uri: "https://liff.line.me/2008845366-m8PxiFt0/promotions.html?promo=new-member",
+                  uri: "https://line-bot-sushi.onrender.com/promotions.html?promo=new-member",
                 },
                 color: "#4ECDC4",
               },
@@ -409,7 +409,7 @@ function getPromotionsFlex() {
                 action: {
                   type: "uri",
                   label: "View Details 📋",
-                  uri: "https://liff.line.me/2008845366-m8PxiFt0/promotions.html?promo=refer-friend",
+                  uri: "https://line-bot-sushi.onrender.com/promotions.html?promo=refer-friend",
                 },
                 color: "#FFB84D",
               },
