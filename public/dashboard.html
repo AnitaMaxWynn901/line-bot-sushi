@@ -183,18 +183,6 @@
       margin-bottom: 20px;
     }
 
-    .debug {
-      background: #333;
-      color: #0f0;
-      padding: 10px;
-      border-radius: 5px;
-      margin: 10px 0;
-      font-size: 12px;
-      font-family: monospace;
-      max-height: 200px;
-      overflow-y: auto;
-    }
-
     .progress-bar {
       background: #eee;
       border-radius: 10px;
@@ -229,23 +217,13 @@
       <p>Your complete membership overview</p>
     </div>
 
-    <!-- DEBUG OUTPUT -->
-    <div class="debug" id="debugLog">
-      🔍 Debug Log:<br>
-      Initializing...
-    </div>
-
     <div id="loadingMessage" class="loading">
       Loading your dashboard...
     </div>
 
     <div id="dashboardContent" style="display: none;">
-      <!-- Profile Card -->
-      <div class="profile-card" id="profileCard">
-        <!-- Will be filled by JavaScript -->
-      </div>
+      <div class="profile-card" id="profileCard"></div>
 
-      <!-- Stats Grid -->
       <div class="stats-grid">
         <div class="stat-box">
           <div class="stat-icon">💎</div>
@@ -259,7 +237,6 @@
         </div>
       </div>
 
-      <!-- Rewards Progress -->
       <div class="reward-card">
         <h3>🎁 Rewards Progress</h3>
         <p id="rewardMessage">Keep earning points!</p>
@@ -268,7 +245,6 @@
         </div>
       </div>
 
-      <!-- Member Info -->
       <div class="info-card">
         <h3 style="margin-bottom: 15px; color: #333;">📋 Member Information</h3>
         <div class="info-row">
@@ -289,7 +265,6 @@
         </div>
       </div>
 
-      <!-- Action Buttons -->
       <button class="btn" onclick="openMenu()">🍣 Order Now</button>
       <button class="btn" onclick="closeLIFF()" style="background: #6c757d;">Close</button>
     </div>
@@ -299,122 +274,58 @@
     const SUPABASE_URL = 'https://rrppsqmcunaeouijzrly.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJycHBzcW1jdW5hZW91aWp6cmx5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgxNzYzMTEsImV4cCI6MjA4Mzc1MjMxMX0.oOh5Dox4S4k9nRjDGMYi1iFUbGSjsnx8_Fgd7n1EE-8';
 
-    let supabase;
+    let supabaseClient;
     let userProfile;
-    
-    // Debug logging function
-    function debugLog(message) {
-      const debugDiv = document.getElementById('debugLog');
-      debugDiv.innerHTML += '<br>' + message;
-      console.log(message);
-      debugDiv.scrollTop = debugDiv.scrollHeight;
-    }
 
     (async function () {
       try {
-        debugLog('✅ Script started');
-        
-        // Wait for Supabase SDK
-        debugLog('⏳ Waiting for Supabase SDK...');
-        let supabaseWait = 0;
-        while (typeof window.supabase === 'undefined' && supabaseWait < 50) {
+        while (typeof window.supabase === 'undefined') {
           await new Promise(resolve => setTimeout(resolve, 100));
-          supabaseWait++;
         }
-        
-        if (typeof window.supabase === 'undefined') {
-          debugLog('❌ Supabase SDK failed to load');
-          showError('Supabase SDK not loaded');
-          return;
-        }
-        
-        debugLog('✅ Supabase SDK loaded');
-        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        debugLog('✅ Supabase client created');
+        supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // Wait for LIFF SDK
-        debugLog('⏳ Waiting for LIFF SDK...');
-        let liffWait = 0;
-        while (typeof liff === 'undefined' && liffWait < 50) {
+        while (typeof liff === 'undefined') {
           await new Promise(resolve => setTimeout(resolve, 100));
-          liffWait++;
         }
-        
-        if (typeof liff === 'undefined') {
-          debugLog('❌ LIFF SDK failed to load');
-          showError('LIFF SDK not loaded');
-          return;
-        }
-        
-        debugLog('✅ LIFF SDK loaded');
 
-        // Initialize LIFF
-        debugLog('⏳ Initializing LIFF with ID: 2008845366-m8PxiFt0');
         await liff.init({ liffId: '2008845366-m8PxiFt0' });
-        debugLog('✅ LIFF initialized');
 
         if (liff.isLoggedIn()) {
-          debugLog('✅ User is logged in');
           userProfile = await liff.getProfile();
-          debugLog('✅ Profile loaded: ' + userProfile.displayName);
-          debugLog('👤 User ID: ' + userProfile.userId.substring(0, 20) + '...');
           await loadDashboard();
         } else {
-          debugLog('⚠️ User not logged in, redirecting to login...');
           liff.login();
         }
       } catch (err) {
-        debugLog('❌ ERROR: ' + err.message);
-        console.error('Full error:', err);
+        console.error('Error:', err);
         showError('Failed to load dashboard: ' + err.message);
       }
     })();
 
     async function loadDashboard() {
       try {
-        debugLog('📊 Loading dashboard for: ' + userProfile.userId);
-
-        // Fetch member data
-        debugLog('⏳ Fetching member data from Supabase...');
-        const { data: member, error } = await supabase
+        const { data: member, error } = await supabaseClient
           .from('members')
           .select('*')
           .eq('line_user_id', userProfile.userId)
           .single();
 
-        if (error) {
-          debugLog('❌ Supabase error: ' + error.message);
-          showError('Database error: ' + error.message);
-          return;
-        }
-
-        if (!member) {
-          debugLog('❌ Member not found in database');
+        if (error || !member) {
           showError('Member not found. Please register first.');
           return;
         }
 
-        debugLog('✅ Member found: ' + member.display_name);
-        debugLog('💎 Points: ' + member.points);
-
-        // Display dashboard
         displayDashboard(member);
-
       } catch (err) {
-        debugLog('❌ Dashboard error: ' + err.message);
         console.error('Dashboard error:', err);
         showError('Error loading dashboard');
       }
     }
 
     function displayDashboard(member) {
-      debugLog('🎨 Rendering dashboard...');
-      
-      // Hide loading
       document.getElementById('loadingMessage').style.display = 'none';
       document.getElementById('dashboardContent').style.display = 'block';
 
-      // Profile Card
       document.getElementById('profileCard').innerHTML = `
         <img src="${userProfile.pictureUrl}" alt="Profile">
         <h2>Hello, ${member.display_name}! 👋</h2>
@@ -422,24 +333,19 @@
         <div class="points-badge">💎 ${member.points} Points</div>
       `;
 
-      // Stats
       document.getElementById('totalPoints').textContent = member.points;
 
-      // Calculate points to next reward (every 50 points = 1 reward)
       const pointsToNext = 50 - (member.points % 50);
       document.getElementById('pointsToReward').textContent = pointsToNext;
 
-      // Progress bar
       const progressPercent = ((member.points % 50) / 50) * 100;
       document.getElementById('progressBar').style.width = progressPercent + '%';
 
-      // Reward message
       const currentLevel = Math.floor(member.points / 50);
       const nextLevel = currentLevel + 1;
       document.getElementById('rewardMessage').textContent =
         `Level ${currentLevel} → ${pointsToNext} points to Level ${nextLevel}!`;
 
-      // Member Info
       document.getElementById('memberPhone').textContent = member.phone;
       document.getElementById('userId').textContent = userProfile.userId.substring(0, 20) + '...';
 
@@ -454,16 +360,12 @@
         day: 'numeric'
       });
       document.getElementById('memberSince').textContent = memberSince;
-      
-      debugLog('✅ Dashboard rendered successfully!');
     }
 
     function showError(message) {
       document.getElementById('loadingMessage').style.display = 'none';
       const container = document.querySelector('.container');
-      const debugDiv = document.getElementById('debugLog');
-      
-      container.innerHTML = debugDiv.outerHTML + `
+      container.innerHTML = `
         <div class="error">
           ❌ ${message}
         </div>
@@ -472,12 +374,10 @@
     }
 
     function openMenu() {
-      debugLog('🍣 Opening menu...');
       window.location.href = '/liff-app.html';
     }
 
     function closeLIFF() {
-      debugLog('👋 Closing LIFF...');
       liff.closeWindow();
     }
   </script>

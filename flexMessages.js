@@ -24,8 +24,8 @@ async function getMemberDashboardFlex(userId) {
 
     console.log("✅ Member found:", member.display_name);
 
-    // FIXED: Button URL now includes /dashboard.html path
-    // This tells LIFF to open the dashboard.html page specifically
+    // Button URL - opens the LIFF app base URL
+    // Since Endpoint URL is already set to /dashboard.html, we don't add it here
     const liffUrl = "https://liff.line.me/2008845366-m8PxiFt0";
 
     return {
