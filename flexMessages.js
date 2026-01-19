@@ -26,7 +26,7 @@ async function getMemberDashboardFlex(userId) {
 
     // FIXED: Button URL now includes /dashboard.html path
     // This tells LIFF to open the dashboard.html page specifically
-    const liffUrl = "https://liff.line.me/2008845366-m8PxiFt0/dashboard.html";
+    const liffUrl = "https://liff.line.me/2008845366-m8PxiFt0";
 
     return {
       type: "flex",
