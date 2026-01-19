@@ -6,7 +6,7 @@ const supabaseKey =
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 // Member Dashboard Flex Message
-async function getMemberDashboardFlex(userId, liffUrl) {
+async function getMemberDashboardFlex(userId) {
   try {
     console.log("📊 Creating Member Dashboard Flex Message for:", userId);
 
@@ -34,31 +34,39 @@ async function getMemberDashboardFlex(userId, liffUrl) {
       }
     );
 
-    // Get the base LIFF URL without /liff-app.html or /dashboard.html
-    // If liffUrl is "https://liff.line.me/2008845366-HByFMhkn" we use it directly
-    const baseUrl = liffUrl;
+    // Button should use LIFF URL, not server URL
+    // Format: https://liff.line.me/YOUR-LIFF-ID/dashboard.html
+    const liffUrl = "https://liff.line.me/2008845366-HByFMhkn/dashboard.html";
 
     return {
       type: "flex",
       altText: `📊 Member Dashboard - ${member.display_name}`,
       contents: {
         type: "bubble",
-        size: "micro",
+        size: "kilo",
         hero: {
           type: "box",
           layout: "vertical",
           contents: [
             {
               type: "text",
-              text: "📊 Member Dashboard",
+              text: "📊 MEMBER DASHBOARD",
               weight: "bold",
-              size: "lg",
+              size: "xl",
               color: "#ffffff",
               align: "center",
             },
+            {
+              type: "text",
+              text: "Sushi Restaurant",
+              size: "sm",
+              color: "#ffffff",
+              align: "center",
+              margin: "sm",
+            },
           ],
           backgroundColor: "#667eea",
-          paddingAll: "15px",
+          paddingAll: "20px",
         },
         body: {
           type: "box",
@@ -68,31 +76,66 @@ async function getMemberDashboardFlex(userId, liffUrl) {
               type: "text",
               text: `Hello, ${member.display_name}! 👋`,
               weight: "bold",
-              size: "md",
+              size: "xl",
               wrap: true,
               align: "center",
               color: "#333333",
             },
             {
-              type: "text",
-              text: `💎 ${member.points} Points`,
-              size: "xl",
-              weight: "bold",
-              align: "center",
-              color: "#667eea",
-              margin: "md",
+              type: "separator",
+              margin: "lg",
+            },
+            {
+              type: "box",
+              layout: "horizontal",
+              margin: "lg",
+              contents: [
+                {
+                  type: "box",
+                  layout: "vertical",
+                  contents: [
+                    {
+                      type: "text",
+                      text: "💎",
+                      size: "xxl",
+                      align: "center",
+                    },
+                    {
+                      type: "text",
+                      text: `${member.points}`,
+                      size: "xxl",
+                      weight: "bold",
+                      align: "center",
+                      color: "#667eea",
+                    },
+                    {
+                      type: "text",
+                      text: "Points",
+                      size: "sm",
+                      color: "#999999",
+                      align: "center",
+                      margin: "sm",
+                    },
+                  ],
+                  flex: 1,
+                },
+              ],
+            },
+            {
+              type: "separator",
+              margin: "lg",
             },
             {
               type: "text",
-              text: "Tap below to view your complete dashboard",
-              size: "xs",
+              text: "Tap below for complete details",
+              size: "sm",
               color: "#999999",
               align: "center",
+              margin: "lg",
               wrap: true,
-              margin: "md",
             },
           ],
-          paddingAll: "15px",
+          paddingAll: "20px",
         },
         footer: {
           type: "box",
@@ -105,12 +148,12 @@ async function getMemberDashboardFlex(userId, liffUrl) {
               color: "#667eea",
               action: {
                 type: "uri",
-                label: "View Dashboard 📊",
-                uri: `${baseUrl}/dashboard.html`,
+                label: "View Full Dashboard 📊",
+                uri: liffUrl,
               },
             },
           ],
-          paddingAll: "10px",
+          paddingAll: "15px",
         },
       },
     };
