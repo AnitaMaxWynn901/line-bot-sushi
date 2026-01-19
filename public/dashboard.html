@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Member Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 20px;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    .header {
+      background: white;
+      padding: 25px;
+      border-radius: 15px;
+      text-align: center;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .header h1 {
+      color: #333;
+      font-size: 28px;
+      margin-bottom: 10px;
+    }
+
+    .header p {
+      color: #666;
+      font-size: 14px;
+    }
+
+    .profile-card {
+      background: white;
+      padding: 25px;
+      border-radius: 15px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+
+    .profile-card img {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      margin-bottom: 15px;
+      border: 3px solid #667eea;
+    }
+
+    .profile-card h2 {
+      color: #333;
+      font-size: 24px;
+      margin-bottom: 10px;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .stat-box {
+      background: white;
+      padding: 20px;
+      border-radius: 15px;
+      text-align: center;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .stat-icon {
+      font-size: 32px;
+      margin-bottom: 10px;
+    }
+
+    .stat-value {
+      font-size: 28px;
+      font-weight: bold;
+      color: #667eea;
+      margin-bottom: 5px;
+    }
+
+    .stat-label {
+      font-size: 14px;
+      color: #999;
+    }
+
+    .info-card {
+      background: white;
+      padding: 20px;
+      border-radius: 15px;
+      margin-bottom: 15px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px solid #eee;
+    }
+
+    .info-row:last-child {
+      border-bottom: none;
+    }
+
+    .info-label {
+      color: #999;
+      font-size: 14px;
+    }
+
+    .info-value {
+      color: #333;
+      font-weight: bold;
+      text-align: right;
+    }
+
+    .reward-card {
+      background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+      padding: 20px;
+      border-radius: 15px;
+      margin-bottom: 15px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      color: white;
+    }
+
+    .reward-card h3 {
+      font-size: 20px;
+      margin-bottom: 10px;
+    }
+
+    .reward-card p {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+
+    .btn {
+      background: #667eea;
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      border-radius: 25px;
+      font-size: 16px;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 10px;
+    }
+
+    .btn:hover {
+      background: #5568d3;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 50px;
+      color: white;
+      font-size: 18px;
+    }
+
+    .error {
+      background: #ff4444;
+      color: white;
+      padding: 15px;
+      border-radius: 10px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .progress-bar {
+      background: #eee;
+      border-radius: 10px;
+      height: 20px;
+      margin-top: 10px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+      height: 100%;
+      transition: width 0.3s ease;
+    }
+
+    .points-badge {
+      background: #667eea;
+      color: white;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 18px;
+      font-weight: bold;
+      display: inline-block;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>📊 Member Dashboard</h1>
+      <p>Your complete membership overview</p>
+    </div>
+
+    <div id="loadingMessage" class="loading">
+      Loading your dashboard...
+    </div>
+
+    <div id="dashboardContent" style="display: none;">
+      <!-- Profile Card -->
+      <div class="profile-card" id="profileCard">
+        <!-- Will be filled by JavaScript -->
+      </div>
+
+      <!-- Stats Grid -->
+      <div class="stats-grid">
+        <div class="stat-box">
+          <div class="stat-icon">💎</div>
+          <div class="stat-value" id="totalPoints">0</div>
+          <div class="stat-label">Total Points</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-icon">🎯</div>
+          <div class="stat-value" id="pointsToReward">0</div>
+          <div class="stat-label">To Next Reward</div>
+        </div>
+      </div>
+
+      <!-- Rewards Progress -->
+      <div class="reward-card">
+        <h3>🎁 Rewards Progress</h3>
+        <p id="rewardMessage">Keep earning points!</p>
+        <div class="progress-bar">
+          <div class="progress-fill" id="progressBar"></div>
+        </div>
+      </div>
+
+      <!-- Member Info -->
+      <div class="info-card">
+        <h3 style="margin-bottom: 15px; color: #333;">📋 Member Information</h3>
+        <div class="info-row">
+          <span class="info-label">📱 Phone</span>
+          <span class="info-value" id="memberPhone">-</span>
+        </div>
+        <div class="info-row" id="emailRow" style="display: none;">
+          <span class="info-label">📧 Email</span>
+          <span class="info-value" id="memberEmail">-</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">📅 Member Since</span>
+          <span class="info-value" id="memberSince">-</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">🆔 User ID</span>
+          <span class="info-value" id="userId" style="font-size: 10px;">-</span>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <button class="btn" onclick="openMenu()">🍣 Order Now</button>
+      <button class="btn" onclick="closeLIFF()" style="background: #6c757d;">Close</button>
+    </div>
+  </div>
+
+  <script>
+    const SUPABASE_URL = 'https://rrppsqmcunaeouijzrly.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJycHBzcW1jdW5hZW91aWp6cmx5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgxNzYzMTEsImV4cCI6MjA4Mzc1MjMxMX0.oOh5Dox4S4k9nRjDGMYi1iFUbGSjsnx8_Fgd7n1EE-8';
+
+    let supabase;
+    let userProfile;
+
+    (async function () {
+      try {
+        // Wait for Supabase SDK
+        while (typeof window.supabase === 'undefined') {
+          await new Promise(resolve => setTimeout(resolve, 100));
+        }
+        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // Wait for LIFF SDK
+        while (typeof liff === 'undefined') {
+          await new Promise(resolve => setTimeout(resolve, 100));
+        }
+
+        // Initialize LIFF
+        await liff.init({ liffId: '2008845366-HByFMhkn' });
+
+        if (liff.isLoggedIn()) {
+          userProfile = await liff.getProfile();
+          await loadDashboard();
+        } else {
+          liff.login();
+        }
+      } catch (err) {
+        console.error('Error:', err);
+        showError('Failed to load dashboard: ' + err.message);
+      }
+    })();
+
+    async function loadDashboard() {
+      try {
+        console.log('Loading dashboard for:', userProfile.userId);
+
+        // Fetch member data
+        const { data: member, error } = await supabase
+          .from('members')
+          .select('*')
+          .eq('line_user_id', userProfile.userId)
+          .single();
+
+        if (error || !member) {
+          showError('Member not found. Please register first.');
+          return;
+        }
+
+        // Display dashboard
+        displayDashboard(member);
+
+      } catch (err) {
+        console.error('Dashboard error:', err);
+        showError('Error loading dashboard');
+      }
+    }
+
+    function displayDashboard(member) {
+      // Hide loading
+      document.getElementById('loadingMessage').style.display = 'none';
+      document.getElementById('dashboardContent').style.display = 'block';
+
+      // Profile Card
+      document.getElementById('profileCard').innerHTML = `
+        <img src="${userProfile.pictureUrl}" alt="Profile">
+        <h2>Hello, ${member.display_name}! 👋</h2>
+        <p style="color: #999; margin-top: 5px;">Welcome back to your dashboard</p>
+        <div class="points-badge">💎 ${member.points} Points</div>
+      `;
+
+      // Stats
+      document.getElementById('totalPoints').textContent = member.points;
+      
+      // Calculate points to next reward (every 50 points = 1 reward)
+      const pointsToNext = 50 - (member.points % 50);
+      document.getElementById('pointsToReward').textContent = pointsToNext;
+
+      // Progress bar
+      const progressPercent = ((member.points % 50) / 50) * 100;
+      document.getElementById('progressBar').style.width = progressPercent + '%';
+
+      // Reward message
+      const currentLevel = Math.floor(member.points / 50);
+      const nextLevel = currentLevel + 1;
+      document.getElementById('rewardMessage').textContent = 
+        `Level ${currentLevel} → ${pointsToNext} points to Level ${nextLevel}!`;
+
+      // Member Info
+      document.getElementById('memberPhone').textContent = member.phone;
+      document.getElementById('userId').textContent = userProfile.userId.substring(0, 20) + '...';
+      
+      if (member.email) {
+        document.getElementById('emailRow').style.display = 'flex';
+        document.getElementById('memberEmail').textContent = member.email;
+      }
+
+      const memberSince = new Date(member.created_at).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+      document.getElementById('memberSince').textContent = memberSince;
+    }
+
+    function showError(message) {
+      document.getElementById('loadingMessage').style.display = 'none';
+      const container = document.querySelector('.container');
+      container.innerHTML = `
+        <div class="error">
+          ❌ ${message}
+        </div>
+        <button class="btn" onclick="closeLIFF()" style="background: #6c757d;">Close</button>
+      `;
+    }
+
+    function openMenu() {
+      // Navigate back to main LIFF app
+      window.location.href = 'liff-app.html';
+    }
+
+    function closeLIFF() {
+      liff.closeWindow();
+    }
+  </script>
+</body>
+
+</html>

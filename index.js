@@ -1,6 +1,7 @@
 const express = require("express");
 const line = require("@line/bot-sdk");
 const { createClient } = require("@supabase/supabase-js");
+const { getMemberDashboardFlex } = require("./flexMessages"); // Import Flex Messages
 
 // Configuration
 const config = {
@@ -8,11 +9,14 @@ const config = {
   channelAccessToken: process.env.CHANNEL_ACCESS_TOKEN,
 };
 
-// Supabase configuration - ADD THIS!
+// Supabase configuration
 const supabaseUrl = "https://rrppsqmcunaeouijzrly.supabase.co";
 const supabaseKey =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJycHBzcW1jdW5hZW91aWp6cmx5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgxNzYzMTEsImV4cCI6MjA4Mzc1MjMxMX0.oOh5Dox4S4k9nRjDGMYi1iFUbGSjsnx8_Fgd7n1EE-8";
 const supabase = createClient(supabaseUrl, supabaseKey);
+
+// LIFF URL - CHANGE THIS TO YOUR ACTUAL LIFF URL
+const LIFF_URL = "https://liff.line.me/2008845366-HByFMhkn";
 
 // Create LINE SDK client
 const client = new line.messagingApi.MessagingApiClient({
@@ -55,19 +59,9 @@ async function handleEvent(event) {
   const userMessage = event.message.text;
   const userMessageLower = userMessage.toLowerCase();
 
-  // ADD THESE DEBUG LOGS:
   console.log("===========================================");
   console.log("📨 RAW MESSAGE:", userMessage);
   console.log("📨 LOWERCASE:", userMessageLower);
-  console.log("🔍 Contains 'hello'?", userMessageLower.includes("hello"));
-  console.log("🔍 Contains 'hi'?", userMessageLower.includes("hi"));
-  console.log(
-    "🔍 Contains 'membership'?",
-    userMessageLower.includes("membership")
-  );
-  console.log("🔍 Contains 'member'?", userMessageLower.includes("member"));
-  console.log("🔍 Contains 'points'?", userMessageLower.includes("points"));
-  console.log("🔍 Contains 'menu'?", userMessageLower.includes("menu"));
   console.log("===========================================");
 
   let replyText;
@@ -78,27 +72,44 @@ async function handleEvent(event) {
     return handleOrder(event, userMessage);
   }
 
-  // CHECK MEMBERSHIP FIRST! (BEFORE HELLO/HI)
+  // NEW: Check for DASHBOARD command
+  if (
+    userMessageLower === "dashboard" ||
+    userMessageLower === "member" ||
+    userMessageLower === "my dashboard" ||
+    userMessageLower === "member card"
+  ) {
+    console.log("✅ DASHBOARD COMMAND DETECTED");
+    return sendMemberDashboard(event);
+  }
+
+  // Check membership status (for longer queries)
   if (
     userMessageLower.includes("membership") ||
-    userMessageLower.includes("member") ||
-    userMessageLower.includes("points")
+    userMessageLower.includes("my points") ||
+    userMessageLower.includes("check points")
   ) {
-    console.log("✅ MEMBERSHIP DETECTED - CALLING handleMembershipCheck");
+    console.log("✅ MEMBERSHIP CHECK DETECTED");
     return handleMembershipCheck(event);
   }
 
   // Then check hello/hi
   if (userMessageLower.includes("hello") || userMessageLower.includes("hi")) {
     console.log("✅ HELLO/HI DETECTED");
-    replyText = "Hello! 👋 Welcome to Sushi Bot! How can I help you today?";
+    replyText =
+      "Hello! 👋 Welcome to Sushi Bot!\n\nType 'dashboard' to see your member card! 📊";
   } else if (userMessageLower.includes("menu")) {
     console.log("✅ MENU DETECTED");
     replyText =
       "🍣 Our menu:\n- Salmon Sushi\n- Tuna Sushi\n- Unagi Sushi\n\nTap the LIFF button below to order!";
   } else {
     console.log("✅ DEFAULT MESSAGE");
-    replyText = `You said: "${event.message.text}"\n\nTap the LIFF button below to view our menu! 🍣`;
+    replyText =
+      `You said: "${event.message.text}"\n\n` +
+      `💡 Try these commands:\n` +
+      `• Type "dashboard" - See your member card\n` +
+      `• Type "menu" - View our menu\n` +
+      `• Tap the LIFF button to order! 🍣`;
   }
 
   console.log("📤 REPLYING WITH:", replyText);
@@ -113,6 +124,57 @@ async function handleEvent(event) {
     replyToken: event.replyToken,
     messages: [echo],
   });
+}
+
+// NEW FUNCTION: Send Member Dashboard Flex Message
+async function sendMemberDashboard(event) {
+  try {
+    const userId = event.source.userId;
+
+    console.log("📊 Sending Member Dashboard to:", userId);
+
+    // Get the Flex Message
+    const flexMessage = await getMemberDashboardFlex(userId, LIFF_URL);
+
+    if (!flexMessage) {
+      // User is not a member
+      const notMemberMessage = {
+        type: "text",
+        text:
+          "❌ You are not a member yet.\n\n" +
+          "Tap the LIFF button below to register and start earning points! 🌟\n\n" +
+          "Benefits:\n" +
+          "✅ Earn points on every order\n" +
+          "✅ Special member discounts\n" +
+          "✅ Exclusive promotions",
+      };
+
+      return client.replyMessage({
+        replyToken: event.replyToken,
+        messages: [notMemberMessage],
+      });
+    }
+
+    // Send the Flex Message
+    console.log("✅ Sending Member Dashboard Flex Message");
+
+    return client.replyMessage({
+      replyToken: event.replyToken,
+      messages: [flexMessage],
+    });
+  } catch (error) {
+    console.error("❌ Error sending Member Dashboard:", error);
+
+    const errorMessage = {
+      type: "text",
+      text: "❌ Sorry, there was an error loading your dashboard.\nPlease try again later.",
+    };
+
+    return client.replyMessage({
+      replyToken: event.replyToken,
+      messages: [errorMessage],
+    });
+  }
 }
 
 // Handle order messages
@@ -162,8 +224,6 @@ async function handleOrder(event, orderMessage) {
 
     console.log("✅ Order confirmation sent successfully");
     await updateMemberPoints(userId, parseInt(points));
-
-    //  Phase 3 - Save order to database and update member points
   } catch (error) {
     console.error("❌ Error handling order:", error);
 
@@ -231,7 +291,7 @@ async function updateMemberPoints(lineUserId, pointsToAdd) {
       messages: [
         {
           type: "text",
-          text: `🎉 Points Updated!\n\nYou earned ${pointsToAdd} points!\n💎 Total points: ${newPoints} pts`,
+          text: `🎉 Points Updated!\n\nYou earned ${pointsToAdd} points!\n💎 Total points: ${newPoints} pts\n\nType "dashboard" to see your member card!`,
         },
       ],
     });
@@ -240,7 +300,7 @@ async function updateMemberPoints(lineUserId, pointsToAdd) {
   }
 }
 
-// Check membership status
+// Check membership status (text-based response)
 async function handleMembershipCheck(event) {
   try {
     const userId = event.source.userId;
@@ -290,6 +350,7 @@ async function handleMembershipCheck(event) {
           `📱 Phone: ${member.phone}\n` +
           `💎 Points: ${member.points} pts\n\n` +
           `📅 Member since: ${memberSince}\n\n` +
+          "💡 Type 'dashboard' to see a beautiful member card!\n\n" +
           "Keep ordering to earn more points! 🍣",
       };
     }
@@ -318,4 +379,5 @@ const port = process.env.PORT || 3000;
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
   console.log(`Webhook URL: /webhook`);
+  console.log(`LIFF URL: ${LIFF_URL}`);
 });
