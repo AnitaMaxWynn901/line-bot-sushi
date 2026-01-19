@@ -31,7 +31,7 @@ async function getMemberDashboardFlex(userId) {
     });
 
     // Button should use LIFF URL, not server URL
-    // Format: https://liff.line.me/YOUR-LIFF-ID/dashboard.html
+
     const liffUrl = 'https://liff.line.me/2008845366-m8PxiFt0';
     
     return {

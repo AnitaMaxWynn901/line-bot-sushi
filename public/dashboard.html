@@ -298,7 +298,7 @@
         }
 
         // Initialize LIFF
-        await liff.init({ liffId: '2008845366-HByFMhkn' });
+        await liff.init({ liffId: '2008845366-m8PxiFt0' });
 
         if (liff.isLoggedIn()) {
           userProfile = await liff.getProfile();
@@ -352,7 +352,7 @@
 
       // Stats
       document.getElementById('totalPoints').textContent = member.points;
-      
+
       // Calculate points to next reward (every 50 points = 1 reward)
       const pointsToNext = 50 - (member.points % 50);
       document.getElementById('pointsToReward').textContent = pointsToNext;
@@ -364,13 +364,13 @@
       // Reward message
       const currentLevel = Math.floor(member.points / 50);
       const nextLevel = currentLevel + 1;
-      document.getElementById('rewardMessage').textContent = 
+      document.getElementById('rewardMessage').textContent =
         `Level ${currentLevel} → ${pointsToNext} points to Level ${nextLevel}!`;
 
       // Member Info
       document.getElementById('memberPhone').textContent = member.phone;
       document.getElementById('userId').textContent = userProfile.userId.substring(0, 20) + '...';
-      
+
       if (member.email) {
         document.getElementById('emailRow').style.display = 'flex';
         document.getElementById('memberEmail').textContent = member.email;
