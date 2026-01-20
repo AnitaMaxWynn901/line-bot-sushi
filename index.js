@@ -106,10 +106,6 @@ async function handleEvent(event) {
     console.log("✅ HELLO/HI DETECTED");
     replyText =
       "Hello! 👋 Welcome to Sushi Bot!\n\nType 'dashboard' to see your member card! 📊";
-  } else if (userMessageLower.includes("menu")) {
-    console.log("✅ MENU DETECTED");
-    replyText =
-      "🍣 Our menu:\n- Salmon Sushi\n- Tuna Sushi\n- Unagi Sushi\n\nTap the LIFF button below to order!";
   } else {
     console.log("✅ DEFAULT MESSAGE");
     replyText =
