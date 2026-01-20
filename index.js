@@ -1,7 +1,11 @@
 const express = require("express");
 const line = require("@line/bot-sdk");
 const { createClient } = require("@supabase/supabase-js");
-const { getMemberDashboardFlex, getPromotionsFlex } = require("./flexMessages"); // Import Flex Messages
+const {
+  getMemberDashboardFlex,
+  getPromotionsFlex,
+  getMenuFlex,
+} = require("./flexMessages");
 
 // Configuration
 const config = {
@@ -91,6 +95,12 @@ async function handleEvent(event) {
     return sendPromotions(event);
   }
 
+  // NEW: Check for MENU command
+  if (userMessageLower.includes("menu")) {
+    console.log("✅ MENU COMMAND DETECTED");
+    return sendMenuCards(event);
+  }
+
   // Check membership status (for longer queries)
   if (
     userMessageLower.includes("membership") ||
@@ -128,6 +138,34 @@ async function handleEvent(event) {
     replyToken: event.replyToken,
     messages: [echo],
   });
+}
+
+// NEW FUNCTION: Send Menu Cards
+async function sendMenuCards(event) {
+  try {
+    console.log("🍣 Sending Menu Cards");
+
+    // Get the menu Flex Message carousel
+    const flexMessage = getMenuFlex();
+
+    // Send the carousel
+    return client.replyMessage({
+      replyToken: event.replyToken,
+      messages: [flexMessage],
+    });
+  } catch (error) {
+    console.error("❌ Error sending Menu Cards:", error);
+
+    const errorMessage = {
+      type: "text",
+      text: "❌ Sorry, there was an error loading the menu.\n\n🍣 Our menu:\n- Salmon Sushi\n- Tuna Sushi\n- Unagi Sushi\n\nTap the LIFF button to order!",
+    };
+
+    return client.replyMessage({
+      replyToken: event.replyToken,
+      messages: [errorMessage],
+    });
+  }
 }
 
 // NEW FUNCTION: Send Promotions Carousel
@@ -215,10 +253,7 @@ async function handleOrder(event, orderMessage) {
     console.log("📦 Order received from user:", event.source.userId);
     console.log("Order details:", orderMessage);
 
-    // Parse the order
     const lines = orderMessage.split("\n");
-
-    // Extract total and points
     const totalLine = lines.find((line) => line.includes("Total:"));
     const pointsLine = lines.find((line) => line.includes("Points earned:"));
 
@@ -227,17 +262,8 @@ async function handleOrder(event, orderMessage) {
 
     const total = totalMatch ? totalMatch[1] : "0";
     const points = pointsMatch ? pointsMatch[1] : "0";
-
-    // Get user ID
     const userId = event.source.userId;
 
-    console.log("Parsed order:", {
-      userId: userId,
-      total: total,
-      points: points,
-    });
-
-    // Send confirmation
     const confirmationMessage = {
       type: "text",
       text:
@@ -254,36 +280,15 @@ async function handleOrder(event, orderMessage) {
       messages: [confirmationMessage],
     });
 
-    console.log("✅ Order confirmation sent successfully");
     await updateMemberPoints(userId, parseInt(points));
   } catch (error) {
     console.error("❌ Error handling order:", error);
-
-    // Send error message to user
-    const errorMessage = {
-      type: "text",
-      text: "❌ Sorry, there was an error processing your order.\nPlease try again or contact support.",
-    };
-
-    try {
-      await client.replyMessage({
-        replyToken: event.replyToken,
-        messages: [errorMessage],
-      });
-    } catch (replyError) {
-      console.error("Failed to send error message:", replyError);
-    }
   }
 }
 
 // Update member points in database
 async function updateMemberPoints(lineUserId, pointsToAdd) {
   try {
-    console.log(
-      `💰 Updating points for user: ${lineUserId}, adding ${pointsToAdd} points`
-    );
-
-    // Check if user is a member
     const { data: member, error: fetchError } = await supabase
       .from("members")
       .select("*")
@@ -295,29 +300,21 @@ async function updateMemberPoints(lineUserId, pointsToAdd) {
       return;
     }
 
-    // Calculate new points total
     const currentPoints = member.points || 0;
     const newPoints = currentPoints + pointsToAdd;
 
-    console.log(
-      `Current points: ${currentPoints}, Adding: ${pointsToAdd}, New total: ${newPoints}`
-    );
-
-    // Update points in database
-    const { data, error: updateError } = await supabase
+    const { error: updateError } = await supabase
       .from("members")
       .update({ points: newPoints })
-      .eq("line_user_id", lineUserId)
-      .select();
+      .eq("line_user_id", lineUserId);
 
     if (updateError) {
       console.error("❌ Error updating points:", updateError);
       return;
     }
 
-    console.log("✅ Points updated successfully!", data);
+    console.log("✅ Points updated successfully!");
 
-    // Send notification to user about points update
     await client.pushMessage({
       to: lineUserId,
       messages: [
@@ -332,14 +329,10 @@ async function updateMemberPoints(lineUserId, pointsToAdd) {
   }
 }
 
-// Check membership status (text-based response)
+// Check membership status
 async function handleMembershipCheck(event) {
   try {
     const userId = event.source.userId;
-
-    console.log("🔍 Checking membership for:", userId);
-
-    // Get member data from database
     const { data: member, error } = await supabase
       .from("members")
       .select("*")
@@ -349,29 +342,16 @@ async function handleMembershipCheck(event) {
     let replyMessage;
 
     if (error || !member) {
-      // User is not a member
-      console.log("❌ User is not a member");
       replyMessage = {
         type: "text",
         text:
           "❌ You are not a member yet.\n\n" +
-          "Tap the LIFF button below to register and start earning points! 🌟\n\n" +
-          "Benefits:\n" +
-          "✅ Earn points on every order\n" +
-          "✅ Special member discounts\n" +
-          "✅ Exclusive promotions",
+          "Tap the LIFF button below to register and start earning points! 🌟",
       };
     } else {
-      // User is a member - show their info
-      console.log("✅ Member found:", member);
-
       const memberSince = new Date(member.created_at).toLocaleDateString(
         "en-US",
-        {
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-        }
+        { year: "numeric", month: "long", day: "numeric" }
       );
 
       replyMessage = {
@@ -382,7 +362,6 @@ async function handleMembershipCheck(event) {
           `📱 Phone: ${member.phone}\n` +
           `💎 Points: ${member.points} pts\n\n` +
           `📅 Member since: ${memberSince}\n\n` +
-          "💡 Type 'dashboard' to see a beautiful member card!\n\n" +
           "Keep ordering to earn more points! 🍣",
       };
     }
@@ -393,16 +372,6 @@ async function handleMembershipCheck(event) {
     });
   } catch (error) {
     console.error("❌ Error checking membership:", error);
-
-    const errorMessage = {
-      type: "text",
-      text: "❌ Sorry, there was an error checking your membership.\nPlease try again later.",
-    };
-
-    return client.replyMessage({
-      replyToken: event.replyToken,
-      messages: [errorMessage],
-    });
   }
 }
 
