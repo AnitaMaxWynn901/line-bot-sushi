@@ -25,7 +25,6 @@ async function getMemberDashboardFlex(userId) {
     console.log("✅ Member found:", member.display_name);
 
     // Button URL - opens the LIFF app base URL
-    // Since Endpoint URL is already set to /dashboard.html, we don't add it here
     const liffUrl = "https://liff.line.me/2008845366-m8PxiFt0";
 
     return {
@@ -156,7 +155,164 @@ async function getMemberDashboardFlex(userId) {
 module.exports = {
   getMemberDashboardFlex,
   getPromotionsFlex,
+  getMenuFlex,
 };
+
+// Menu Carousel Flex Message
+function getMenuFlex() {
+  return {
+    type: "flex",
+    altText: "🍣 Sushi Menu - Swipe to see all items!",
+    contents: {
+      type: "carousel",
+      contents: [
+        // Card 1: Salmon Sushi
+        {
+          type: "bubble",
+          size: "kilo",
+          hero: {
+            type: "image",
+            url: "https://i.ibb.co/s9mZKZ4t/salmon-sushi.jpg",
+            size: "full",
+            aspectRatio: "1:1",
+            aspectMode: "cover",
+          },
+          body: {
+            type: "box",
+            layout: "vertical",
+            contents: [
+              {
+                type: "text",
+                text: "Salmon Sushi",
+                weight: "bold",
+                size: "xl",
+              },
+              {
+                type: "text",
+                text: "Fresh Norwegian salmon with premium rice",
+                size: "sm",
+                color: "#666666",
+                margin: "md",
+                wrap: true,
+              },
+              {
+                type: "box",
+                layout: "baseline",
+                margin: "md",
+                contents: [
+                  {
+                    type: "text",
+                    text: "$12",
+                    size: "xl",
+                    color: "#000000",
+                    weight: "bold",
+                  },
+                ],
+              },
+            ],
+            paddingAll: "20px",
+          },
+        },
+
+        // Card 2: Tuna Sushi
+        {
+          type: "bubble",
+          size: "kilo",
+          hero: {
+            type: "image",
+            url: "https://i.ibb.co/PdXMqRq/tuna-sushi.png",
+            size: "full",
+            aspectRatio: "1:1",
+            aspectMode: "cover",
+          },
+          body: {
+            type: "box",
+            layout: "vertical",
+            contents: [
+              {
+                type: "text",
+                text: "Tuna Sushi",
+                weight: "bold",
+                size: "xl",
+              },
+              {
+                type: "text",
+                text: "Premium bluefin tuna, fresh daily",
+                size: "sm",
+                color: "#666666",
+                margin: "md",
+                wrap: true,
+              },
+              {
+                type: "box",
+                layout: "baseline",
+                margin: "md",
+                contents: [
+                  {
+                    type: "text",
+                    text: "$15",
+                    size: "xl",
+                    color: "#000000",
+                    weight: "bold",
+                  },
+                ],
+              },
+            ],
+            paddingAll: "20px",
+          },
+        },
+
+        // Card 3: Unagi Sushi
+        {
+          type: "bubble",
+          size: "kilo",
+          hero: {
+            type: "image",
+            url: "https://i.ibb.co/rRPnH4dT/unagi-sushi.png",
+            size: "full",
+            aspectRatio: "1:1",
+            aspectMode: "cover",
+          },
+          body: {
+            type: "box",
+            layout: "vertical",
+            contents: [
+              {
+                type: "text",
+                text: "Unagi Sushi",
+                weight: "bold",
+                size: "xl",
+              },
+              {
+                type: "text",
+                text: "Grilled eel with sweet teriyaki sauce",
+                size: "sm",
+                color: "#666666",
+                margin: "md",
+                wrap: true,
+              },
+              {
+                type: "box",
+                layout: "baseline",
+                margin: "md",
+                contents: [
+                  {
+                    type: "text",
+                    text: "$18",
+                    size: "xl",
+                    color: "#000000",
+                    weight: "bold",
+                  },
+                ],
+              },
+            ],
+            paddingAll: "20px",
+          },
+        },
+      ],
+    },
+  };
+}
 
 // Promotions Carousel Flex Message
 function getPromotionsFlex() {
