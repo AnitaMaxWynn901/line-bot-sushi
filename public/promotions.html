@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Promotions</title>
-  <!-- ADD LIFF SDK -->
+  <!-- LIFF SDK for proper close functionality -->
   <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   <style>
     * {
@@ -164,26 +164,41 @@
       color: #999;
       line-height: 1.5;
     }
+
+    .loading {
+      text-align: center;
+      padding: 50px;
+      color: white;
+      font-size: 18px;
+    }
   </style>
 </head>
 
 <body>
   <div class="container">
-    <div class="header">
-      <h1>🎉 Promotions</h1>
-      <p>Special offers just for you!</p>
+    <div id="loadingMessage" class="loading">
+      Loading promotion details...
     </div>
 
-    <!-- Content will be filled by JavaScript based on URL parameter -->
-    <div id="promoContent"></div>
+    <div id="mainContent" style="display: none;">
+      <div class="header">
+        <h1>🎉 Promotions</h1>
+        <p>Special offers just for you!</p>
+      </div>
 
-    <button class="btn" onclick="closeLIFF()">← Back to Chat</button>
+      <!-- Content will be filled by JavaScript based on URL parameter -->
+      <div id="promoContent"></div>
+
+      <button class="btn" onclick="closeLIFF()">✕ Close</button>
+    </div>
   </div>
 
   <script>
     // Initialize LIFF first
     (async function () {
       try {
+        console.log('🔄 Waiting for LIFF SDK...');
+
         // Wait for LIFF SDK to load
         let liffWaitCount = 0;
         while (typeof liff === 'undefined' && liffWaitCount < 50) {
@@ -191,18 +206,39 @@
           liffWaitCount++;
         }
 
-        if (typeof liff !== 'undefined') {
-          // Initialize LIFF - you need to get your LIFF ID for this page
-          // This should be a LIFF ID you create in LINE Developers Console
-          await liff.init({ liffId: '2008845366-m8PxiFt0' }); // Replace with actual LIFF ID for promotions page
-          console.log('✅ LIFF initialized for promotions page');
-        } else {
-          console.warn('⚠️ LIFF SDK not loaded');
+        if (typeof liff === 'undefined') {
+          console.error('❌ LIFF SDK failed to load');
+          showError();
+          return;
         }
+
+        console.log('✅ LIFF SDK loaded');
+
+        // Initialize LIFF with your LIFF ID
+        await liff.init({ liffId: '2008845366-bP1BJL4O' });
+        console.log('✅ LIFF initialized');
+
+        // Hide loading, show content
+        document.getElementById('loadingMessage').style.display = 'none';
+        document.getElementById('mainContent').style.display = 'block';
+
+        // Display promotion content
+        displayPromotion();
+
       } catch (err) {
-        console.error('LIFF init error:', err);
+        console.error('❌ LIFF error:', err);
+        showError();
       }
     })();
+
+    function showError() {
+      document.getElementById('loadingMessage').innerHTML = `
+        <div style="background: white; padding: 20px; border-radius: 15px;">
+          <h3 style="color: #ff4444;">❌ Error Loading</h3>
+          <p style="color: #666; margin-top: 10px;">Please try again later</p>
+        </div>
+      `;
+    }
 
     // Get the promo parameter from URL
     const urlParams = new URLSearchParams(window.location.search);
@@ -309,20 +345,10 @@
       `;
     }
 
-    // Display promotion on page load
-    displayPromotion();
-
-    // Close LIFF window function
+    // Close LIFF window - THIS WILL WORK because it's a LIFF app
     window.closeLIFF = function () {
-      if (typeof liff !== 'undefined' && liff.isInClient()) {
+      if (typeof liff !== 'undefined') {
         liff.closeWindow();
-      } else {
-        // Fallback if not in LIFF environment
-        window.close();
-        // If window.close() doesn't work, try going back
-        if (!window.closed) {
-          window.history.back();
-        }
       }
     };
   </script>

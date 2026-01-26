@@ -273,7 +273,11 @@ function getMenuFlex() {
 }
 
 // Promotions Carousel Flex Message
+// Using LIFF URL so the close button works properly
 function getPromotionsFlex() {
+  // LIFF URL for Promotions app
+  const baseLiffUrl = "https://liff.line.me/2008845366-bP1BJL4O";
+
   return {
     type: "flex",
     altText: "🎉 Current Promotions - Swipe to see all deals!",
@@ -355,7 +359,7 @@ function getPromotionsFlex() {
                 action: {
                   type: "uri",
                   label: "View Details 📋",
-                  uri: "https://line-bot-sushi.onrender.com/promotions.html?promo=happy-hour",
+                  uri: `${baseLiffUrl}?promo=happy-hour`,
                 },
                 color: "#FF6B6B",
               },
@@ -439,7 +443,7 @@ function getPromotionsFlex() {
                 action: {
                   type: "uri",
                   label: "View Details 📋",
-                  uri: "https://line-bot-sushi.onrender.com/promotions.html?promo=new-member",
+                  uri: `${baseLiffUrl}?promo=new-member`,
                 },
                 color: "#4ECDC4",
               },
@@ -523,7 +527,7 @@ function getPromotionsFlex() {
                 action: {
                   type: "uri",
                   label: "View Details 📋",
-                  uri: "https://line-bot-sushi.onrender.com/promotions.html?promo=refer-friend",
+                  uri: `${baseLiffUrl}?promo=refer-friend`,
                 },
                 color: "#FFB84D",
               },
