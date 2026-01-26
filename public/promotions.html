@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -163,6 +164,7 @@
     }
   </style>
 </head>
+
 <body>
   <div class="container">
     <div class="header">
@@ -173,7 +175,7 @@
     <!-- Content will be filled by JavaScript based on URL parameter -->
     <div id="promoContent"></div>
 
-    <button class="btn" onclick="goBack()">← Back to Chat</button>
+    <button class="btn" onclick="closeLIFF()">← Back to Chat</button>
   </div>
 
   <script>
@@ -233,7 +235,7 @@
     // Display the promotion details
     function displayPromotion() {
       const promo = promotions[promoType];
-      
+
       if (!promo) {
         document.getElementById('promoContent').innerHTML = `
           <div class="promo-card">
@@ -285,9 +287,10 @@
     // Display promotion on page load
     displayPromotion();
 
-    function goBack() {
-      window.history.back();
-    }
+    window.closeLIFF = function () {
+      liff.closeWindow();
+    };
   </script>
 </body>
+
 </html>
